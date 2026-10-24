@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手势抓取 · 城市记忆盲盒</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js" defer></script>
+<style>
+.cam{
+  position:relative;height:328px;border:1.5px solid var(--ink);border-radius:var(--r-lg);
+  overflow:hidden;background:radial-gradient(320px 220px at 50% 60%, #322a20, #1c1812 75%);
+}
+.cam video,.cam canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:none}
+.cam video{z-index:3}
+.cam #overlay{z-index:4}
+#dust{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;display:block}
+.cam.cam-on video,.cam.cam-on canvas{display:block}
+.cam .tag{position:absolute;font-size:10.5px;color:#d8cfbf;border:1px solid rgba(216,207,191,.4);
+  border-radius:999px;padding:2px 9px;background:rgba(20,16,10,.55);z-index:5}
+.corner{position:absolute;width:22px;height:22px;border:2.5px solid rgba(200,162,75,.8);z-index:5}
+.c1{top:8px;left:8px;border-right:none;border-bottom:none;border-radius:6px 0 0 0}
+.c2{top:8px;right:8px;border-left:none;border-bottom:none;border-radius:0 6px 0 0}
+.c3{bottom:8px;left:8px;border-right:none;border-top:none;border-radius:0 0 0 6px}
+.c4{bottom:8px;right:8px;border-left:none;border-top:none;border-radius:0 0 6px 0}
+
+.orb{
+  position:absolute;left:50%;top:44%;width:86px;height:86px;margin:-43px 0 0 -43px;border-radius:50%;
+  background:radial-gradient(circle at 32% 30%, #fff6dc, #e8b64f 45%, var(--seal) 100%);
+  box-shadow:0 0 30px rgba(200,162,75,.8), 0 0 66px rgba(181,64,44,.4), inset -6px -10px 18px rgba(120,40,20,.5);
+  animation:floaty 3s ease-in-out infinite;z-index:6;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:34px;
+  transition:transform .55s cubic-bezier(.5,-0.2,.7,1.4), opacity .4s;
+}
+.orb.gone{opacity:0;pointer-events:none}
+.spark{position:absolute;width:9px;height:9px;border-radius:50%;background:radial-gradient(circle,#ffe9b0,var(--gold));
+  z-index:7;pointer-events:none;animation:burst .9s ease-out forwards}
+@keyframes burst{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+
+.reveal{
+  position:absolute;inset:0;z-index:8;display:none;flex-direction:column;align-items:center;
+  justify-content:center;gap:7px;background:rgba(22,18,12,.55);backdrop-filter:blur(3px);
+  padding:8px 0;
+}
+.reveal.show{display:flex;animation:fadeIn .45s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.itemwrap{position:relative;width:128px;height:128px}
+.item3d{
+  width:128px;height:128px;border-radius:22px;display:flex;align-items:center;justify-content:center;
+  font-size:62px;user-select:none;
+  border:1.5px solid rgba(216,207,191,.6);box-shadow:0 14px 30px rgba(0,0,0,.5);
+}
+#dirt{
+  position:absolute;inset:0;width:100%;height:100%;border-radius:22px;z-index:2;
+  cursor:crosshair;touch-action:none;display:block;
+}
+#dirt.done{opacity:0;transition:opacity .8s;pointer-events:none}
+.reveal b{font-family:var(--serif);font-size:16.5px;letter-spacing:2px;color:#f7f1e4}
+.reveal .era{font-size:11px;color:var(--gold);letter-spacing:2px}
+.cbarrow{display:flex;align-items:center;gap:8px}
+.cbar{width:140px;height:8px;border:1px solid rgba(216,207,191,.5);border-radius:5px;overflow:hidden;background:rgba(0,0,0,.35)}
+.cfill{height:100%;width:0%;background:linear-gradient(90deg,var(--seal),var(--gold));transition:width .3s}
+#cpct{font-size:10px;color:#e8b64f;min-width:26px;text-align:center}
+.reveal .hint{font-size:10.5px;color:#b9b0a0;text-align:center;line-height:1.7}
+.reveal .pull{
+  border:1.5px solid var(--gold);color:#f7e9c8;background:rgba(200,162,75,.14);
+  border-radius:999px;padding:8px 20px;font-size:13px;cursor:pointer;letter-spacing:1px;
+}
+.reveal .pull[disabled]{opacity:.4;cursor:not-allowed}
+.crumb{position:absolute;width:6px;height:6px;border-radius:2px;background:#8a6f4d;z-index:7;pointer-events:none;animation:crumbFall .7s ease-in forwards}
+@keyframes crumbFall{to{transform:translateY(46px) rotate(60deg);opacity:0}}
+.reveal .pull:active{transform:scale(.97)}
+
+.hud{
+  border:1.5px solid var(--line);border-radius:999px;padding:9px 16px;display:flex;
+  align-items:center;gap:10px;font-size:12.5px;color:var(--ink-2);min-height:38px;
+}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--gold);flex:0 0 auto;animation:pulse 1.4s infinite}
+.dot.off{background:#b9b0a0;animation:none}
+.dot.ok{background:var(--green)}
+
+.gsteps{display:flex;gap:8px}
+.gstep{
+  flex:1;border:1.5px solid var(--line);border-radius:var(--r-md);padding:9px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;
+  font-size:11px;color:var(--ink-3);transition:all .25s;
+}
+.gstep b{font-size:12px;color:var(--ink-2)}
+.gstep .gi{font-size:19px}
+.gstep.active{border-color:var(--seal);background:rgba(181,64,44,.07)}
+.gstep.active b{color:var(--seal)}
+.demorow{display:flex;gap:7px}
+.demorow .btn{flex:1;padding:10px 0;font-size:12px;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="page-tag"><b>04</b>&nbsp;手势抓取页 · GRAB</div>
+<div class="phone">
+  <div class="topbar">
+    <a class="back" href="03-home.html">←</a>
+    <div class="title">手势抓取</div>
+    <div class="spacer"></div>
+    <span class="chip seal" id="cityChip">—</span>
+  </div>
+
+  <div class="cam" id="cam">
+    <span class="corner c1"></span><span class="corner c2"></span>
+    <span class="corner c3"></span><span class="corner c4"></span>
+    <span class="tag" style="top:10px;left:40px">手部关键点 · 21</span>
+    <span class="tag" id="mpTag" style="top:10px;right:40px">● 未开启</span>
+    <span class="tag" style="bottom:10px;left:40px">MediaPipe Hands</span>
+    <span class="tag" style="bottom:10px;right:40px">取景区</span>
+
+    <canvas id="dust"></canvas>
+    <video id="video" playsinline muted></video>
+    <canvas id="overlay"></canvas>
+
+    <div class="orb" id="orb" title="点击盲盒光球">🎁</div>
+    <div class="reveal" id="reveal">
+      <div class="itemwrap" id="itemwrap">
+        <div class="item3d" id="item3d">🎫</div>
+        <canvas id="dirt"></canvas>
+      </div>
+      <b id="rvName">—</b>
+      <span class="era" id="rvEra">—</span>
+      <div class="cbarrow">
+        <div class="cbar"><div class="cfill" id="cfill"></div></div>
+        <span id="cpct">0%</span>
+      </div>
+      <div class="hint">做「挥手」手势在物件上平移，擦去千年尘土<br>（也可按住物件用鼠标 / 手指擦拭）</div>
+      <button class="pull" id="pullBtn" type="button" disabled>双手拉开 · 听 AI 讲故事 ✨</button>
+    </div>
+  </div>
+
+  <div class="hud"><span class="dot off" id="hudDot"></span><span id="hudText">点击「开启手势识别」授权摄像头，或直接用下方演示按钮</span></div>
+
+  <div class="gsteps">
+    <div class="gstep" id="gs-grab"><span class="gi">✊</span><b>握拳 · 抓取</b><i>光球炸开出现物件</i></div>
+    <div class="gstep" id="gs-clean"><span class="gi">🖐</span><b>挥手 · 清理</b><i>掌心平移 擦去尘土</i></div>
+    <div class="gstep" id="gs-pull"><span class="gi">👐</span><b>双手拉开</b><i>触发 AI 讲故事</i></div>
+  </div>
+
+  <div class="demorow">
+    <button class="btn ghost" id="camBtn" type="button">📷 开启手势识别</button>
+    <button class="btn ghost" id="demoGrab" type="button">演示：抓取</button>
+    <button class="btn ghost" id="demoClean" type="button">演示：清理</button>
+    <button class="btn ghost" id="demoPull" type="button">演示：拉开</button>
+  </div>
+
+  <div class="note">请正对摄像头、保证光线充足；无摄像头时可用演示按钮完成同样流程</div>
+</div>
+<nav class="pager"><a href="03-home.html">‹ 上一页</a><a href="index.html">总览</a><a href="05-chat.html">下一页：AI 对话页 ›</a></nav>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function(){
+  var user = requireLogin();
+
+  var cityId = Biz.city(); if(!CITY_DATA[cityId]) cityId = 'shijiazhuang';
+  var city = CITY_DATA[cityId];
+  document.getElementById('cityChip').textContent = city.name;
+
+  /* ---------- 选物件：优先未收集 ---------- */
+  var collected = Biz.collected();
+  var pool = city.items.filter(function(id){ return !collected[id]; });
+  if(!pool.length) pool = city.items.slice();
+  var targetId = pool[Math.floor(Math.random() * pool.length)];
+
+  var relay = qsParam('relay');
+  if(relay) setTimeout(function(){ toast('🎉 好友「' + relay + '」邀请你接力抓取！', 3000); }, 300);
+
+  /* ---------- 状态机 ---------- */
+  var state = 'idle';           // idle -> cleaning -> cleaned
+  var orb = document.getElementById('orb');
+  var reveal = document.getElementById('reveal');
+  var cam = document.getElementById('cam');
+
+  function setHud(text, cls){
+    document.getElementById('hudText').textContent = text;
+    document.getElementById('hudDot').className = 'dot ' + (cls || '');
+  }
+  function setStep(name){
+    ['grab','clean','pull'].forEach(function(k){
+      document.getElementById('gs-' + k).classList.toggle('active', k === name);
+    });
+  }
+  setStep('grab');
+
+  /* ---------- 抓取动画 ---------- */
+  function doGrab(px, py){
+    if(state !== 'idle') return;
+    state = 'burst';
+    var rect = cam.getBoundingClientRect();
+    var tx = (px == null ? rect.width / 2 : px) - rect.width / 2;
+    var ty = (py == null ? rect.height * .44 : py) - rect.height * .44;
+    orb.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(1.5)';
+    orb.style.transition = 'transform .45s ease-in, opacity .1s .45s';
+    setTimeout(function(){
+      orb.style.opacity = '0';
+      /* 炸开粒子 */
+      for(var i = 0; i < 16; i++){
+        var s = document.createElement('span');
+        s.className = 'spark';
+        var ang = Math.PI * 2 * i / 16, r = 55 + Math.random() * 55;
+        s.style.left = (rect.width / 2 + tx) + 'px';
+        s.style.top = (rect.height * .44 + ty) + 'px';
+        s.style.setProperty('--dx', Math.cos(ang) * r + 'px');
+        s.style.setProperty('--dy', Math.sin(ang) * r + 'px');
+        cam.appendChild(s);
+        setTimeout(function(n){ return function(){ n.remove(); }; }(s), 950);
+      }
+      setTimeout(showReveal, 220);
+    }, 480);
+  }
+
+  function showReveal(){
+    state = 'cleaning';
+    orb.classList.add('gone');
+    var it = ITEM_DATA[targetId];
+    var el3d = document.getElementById('item3d');
+    el3d.textContent = it.emoji;
+    el3d.style.background = 'hsl(' + it.hue + ',38%,86%)';
+    document.getElementById('rvName').textContent = it.name;
+    document.getElementById('rvEra').textContent = it.en + ' · ' + it.era;
+    reveal.classList.add('show');
+    document.getElementById('dirt').classList.remove('done');
+    document.getElementById('cfill').style.width = '0%';
+    document.getElementById('cpct').textContent = '0%';
+    document.getElementById('pullBtn').setAttribute('disabled', '');
+    initDirt();
+    setHud('出土了一件「' + it.name + '」！手掌在物件上平移，擦去千年尘土', 'ok');
+    setStep('clean');
+    /* 记录浏览记录（抓取即记录） */
+    Biz.addHistory(targetId);
+    Store.set('lastGrab', { item: targetId, ts: Date.now() });
+    if(window.navigator && navigator.vibrate) try{ navigator.vibrate(60); }catch(e){}
+  }
+
+  /* ---------- 考古清理：泥土遮罩 + 擦除 ---------- */
+  var dirt = document.getElementById('dirt');
+  var dctx2 = dirt.getContext('2d');
+  var itemwrap = document.getElementById('itemwrap');
+  var cleanPct = 0, cells = null, CW = 10, CH = 10, lastCrumb = 0, pullHintAt = 0;
+
+  function initDirt(){
+    var w = itemwrap.clientWidth, h = itemwrap.clientHeight;
+    dirt.width = w; dirt.height = h;
+    dctx2.globalCompositeOperation = 'source-over';
+    var g = dctx2.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, '#8f7350'); g.addColorStop(.5, '#6f5738'); g.addColorStop(1, '#7d6544');
+    dctx2.fillStyle = g; dctx2.fillRect(0, 0, w, h);
+    /* 泥土颗粒 */
+    for(var i = 0; i < 480; i++){
+      dctx2.beginPath();
+      dctx2.fillStyle = Math.random() < .5
+        ? 'rgba(46,34,20,' + (.05 + Math.random() * .18) + ')'
+        : 'rgba(226,196,140,' + (.04 + Math.random() * .14) + ')';
+      dctx2.arc(Math.random() * w, Math.random() * h, .5 + Math.random() * 1.6, 0, Math.PI * 2);
+      dctx2.fill();
+    }
+    /* 小土块 */
+    for(var k = 0; k < 22; k++){
+      dctx2.beginPath();
+      dctx2.fillStyle = Math.random() < .5 ? 'rgba(58,43,26,.35)' : 'rgba(168,138,94,.30)';
+      dctx2.ellipse(Math.random() * w, Math.random() * h, 2 + Math.random() * 5, 1.5 + Math.random() * 3.5,
+        Math.random() * Math.PI, 0, Math.PI * 2);
+      dctx2.fill();
+    }
+    /* 勘探水印 */
+    dctx2.fillStyle = 'rgba(255,242,214,.42)';
+    dctx2.font = '10px sans-serif'; dctx2.textAlign = 'center';
+    dctx2.fillText('出 土 待 清 理', w / 2, h - 9);
+    cells = [];
+    for(var r = 0; r < CH; r++) cells.push(new Array(CW).fill(false));
+    cleanPct = 0;
+  }
+
+  function markCells(x, y, r){
+    for(var cy = 0; cy < CH; cy++) for(var cx = 0; cx < CW; cx++){
+      if(cells[cy][cx]) continue;
+      var mx = (cx + .5) * dirt.width / CW, my = (cy + .5) * dirt.height / CH;
+      if(Math.hypot(mx - x, my - y) < r * .85){ cells[cy][cx] = true; cleanPct++; }
+    }
+    var pct = Math.round(cleanPct / (CW * CH) * 100);
+    document.getElementById('cfill').style.width = pct + '%';
+    document.getElementById('cpct').textContent = pct + '%';
+    if(pct >= 80 && state === 'cleaning') finishClean();
+  }
+
+  function eraseAt(x, y, r){
+    if(state !== 'cleaning') return;
+    dctx2.globalCompositeOperation = 'destination-out';
+    var g = dctx2.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(0,0,0,1)');
+    g.addColorStop(.72, 'rgba(0,0,0,.85)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    dctx2.fillStyle = g;
+    dctx2.beginPath(); dctx2.arc(x, y, r, 0, Math.PI * 2); dctx2.fill();
+    dctx2.globalCompositeOperation = 'source-over';
+    markCells(x, y, r);
+    /* 泥屑掉落 */
+    var now = Date.now();
+    if(now - lastCrumb > 70){
+      lastCrumb = now;
+      var c = document.createElement('span');
+      c.className = 'crumb';
+      var wr = itemwrap.getBoundingClientRect(), cr3 = cam.getBoundingClientRect();
+      c.style.left = (wr.left - cr3.left + x) + 'px';
+      c.style.top = (wr.top - cr3.top + y) + 'px';
+      c.style.background = Math.random() < .5 ? '#8a6f4d' : '#5f4a2e';
+      cam.appendChild(c);
+      setTimeout(function(n){ return function(){ n.remove(); }; }(c), 750);
+    }
+  }
+
+  function finishClean(){
+    state = 'cleaned';
+    document.getElementById('dirt').classList.add('done');   // 余泥淡出
+    setTimeout(function(){ dctx2.clearRect(0, 0, dirt.width, dirt.height); }, 850);
+    document.getElementById('cfill').style.width = '100%';
+    document.getElementById('cpct').textContent = '✓';
+    document.getElementById('pullBtn').removeAttribute('disabled');
+    setStep('pull');
+    setHud('清理完成！「' + ITEM_DATA[targetId].name + '」重见天日 · 双手拉开听故事', 'ok');
+    /* 金光迸发 */
+    var wr = itemwrap.getBoundingClientRect(), cr3 = cam.getBoundingClientRect();
+    var cx2 = wr.left - cr3.left + wr.width / 2, cy2 = wr.top - cr3.top + wr.height / 2;
+    for(var i = 0; i < 18; i++){
+      var s = document.createElement('span');
+      s.className = 'spark';
+      var ang = Math.PI * 2 * i / 18, r2 = 46 + Math.random() * 46;
+      s.style.left = cx2 + 'px'; s.style.top = cy2 + 'px';
+      s.style.setProperty('--dx', Math.cos(ang) * r2 + 'px');
+      s.style.setProperty('--dy', Math.sin(ang) * r2 + 'px');
+      cam.appendChild(s);
+      setTimeout(function(n){ return function(){ n.remove(); }; }(s), 950);
+    }
+    if(window.navigator && navigator.vibrate) try{ navigator.vibrate([40, 60, 80]); }catch(e){}
+  }
+
+  /* 鼠标 / 触摸擦拭兜底 */
+  (function(){
+    var scrubbing = false;
+    function fromEvent(e){
+      var r = dirt.getBoundingClientRect();
+      eraseAt(e.clientX - r.left, e.clientY - r.top, 26);
+    }
+    dirt.addEventListener('pointerdown', function(e){
+      if(state !== 'cleaning') return;
+      scrubbing = true; dirt.setPointerCapture(e.pointerId); fromEvent(e);
+    });
+    dirt.addEventListener('pointermove', function(e){ if(scrubbing) fromEvent(e); });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function(ev){
+      dirt.addEventListener(ev, function(){ scrubbing = false; });
+    });
+  })();
+
+  /* ---------- 拉开 → 对话页 ---------- */
+  function pullApart(){
+    if(state !== 'cleaned') return;
+    setStep('pull');
+    toast('双手拉开 · AI 记忆讲述人已就位');
+    setTimeout(function(){ location.href = '05-chat.html?item=' + targetId; }, 420);
+  }
+
+  document.getElementById('pullBtn').onclick = pullApart;
+  document.getElementById('demoClean').onclick = function(){
+    if(state === 'idle'){ toast('先「握拳抓取」打开盲盒'); return; }
+    if(state === 'cleaned'){ toast('已经清理完成啦'); return; }
+    var step = 0;
+    var iv = setInterval(function(){
+      if(state !== 'cleaning'){ clearInterval(iv); return; }
+      var col = step % 12, row = Math.floor(step / 12) % 10;
+      eraseAt((col + .5) * dirt.width / 12, (row + .5) * dirt.height / 10, dirt.width / 4.5);
+      step++;
+      if(step > 140) clearInterval(iv);
+    }, 60);
+  };
+  document.getElementById('demoPull').onclick = function(){
+    if(state === 'idle') toast('先「握拳抓取」打开盲盒，再拉开哦');
+    else if(state === 'cleaning') toast('先把文物清理干净，再拉开听故事哦');
+    else pullApart();
+  };
+  document.getElementById('demoGrab').onclick = function(){ doGrab(); };
+  orb.onclick = function(){ doGrab(); };
+
+  /* ---------- 背景粒子：金色尘埃缓缓上浮（摄像头开启时自动暂停） ---------- */
+  var dust = document.getElementById('dust');
+  var dctx = dust.getContext('2d');
+  var dustRAF = null, dusts = [];
+
+  function dustInit(){
+    dust.width = cam.clientWidth; dust.height = cam.clientHeight;
+    dusts = [];
+    for(var i = 0; i < 72; i++){
+      var big = Math.random() < .22;
+      dusts.push({
+        x: Math.random() * dust.width,
+        y: Math.random() * dust.height,
+        r: big ? 2.4 + Math.random() * 2.2 : .9 + Math.random() * 1.7,
+        vy: -(.1 + Math.random() * .38),      // 上浮速度
+        sway: .2 + Math.random() * .7,        // 左右摆幅
+        phase: Math.random() * Math.PI * 2,
+        tw: .5 + Math.random() * 1.4,         // 闪烁频率
+        seal: Math.random() < .18             // 少量朱砂色点缀
+      });
+    }
+  }
+  function dustFrame(t){
+    dctx.clearRect(0, 0, dust.width, dust.height);
+    /* 中央呼吸微光，托住光球 */
+    var breathe = .10 + .05 * Math.sin(t / 1800);
+    var g0 = dctx.createRadialGradient(dust.width / 2, dust.height * .44, 10,
+                                       dust.width / 2, dust.height * .44, Math.min(dust.width, dust.height) * .55);
+    g0.addColorStop(0, 'rgba(232,182,79,' + breathe.toFixed(3) + ')');
+    g0.addColorStop(1, 'rgba(232,182,79,0)');
+    dctx.fillStyle = g0;
+    dctx.fillRect(0, 0, dust.width, dust.height);
+
+    for(var i = 0; i < dusts.length; i++){
+      var p = dusts[i];
+      p.y += p.vy;
+      p.x += Math.sin(t / 1600 + p.phase) * p.sway * .45;
+      if(p.y < -8){ p.y = dust.height + 8; p.x = Math.random() * dust.width; }
+      if(p.x < -8) p.x = dust.width + 8; else if(p.x > dust.width + 8) p.x = -8;
+      var a = .35 + .55 * (.5 + .5 * Math.sin(t / 650 * p.tw + p.phase));
+      var col = p.seal ? [214, 116, 88] : [236, 200, 126];
+      if(p.r > 2.3){
+        /* 大颗粒：柔光晕 */
+        var g = dctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3.2);
+        g.addColorStop(0, 'rgba(' + col.join(',') + ',' + a.toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(' + col.join(',') + ',0)');
+        dctx.fillStyle = g;
+        dctx.beginPath(); dctx.arc(p.x, p.y, p.r * 3.2, 0, Math.PI * 2); dctx.fill();
+      }else{
+        dctx.beginPath();
+        dctx.fillStyle = 'rgba(' + col.join(',') + ',' + a.toFixed(3) + ')';
+        dctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        dctx.fill();
+      }
+    }
+    dustRAF = requestAnimationFrame(dustFrame);
+  }
+  function dustStart(){
+    if(dustRAF == null){ dustInit(); dustRAF = requestAnimationFrame(dustFrame); }
+  }
+  function dustStop(){
+    if(dustRAF != null){ cancelAnimationFrame(dustRAF); dustRAF = null; }
+  }
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden) dustStop(); else if(!camOn) dustStart();
+  });
+  window.addEventListener('resize', function(){ if(dustRAF != null) dustInit(); });
+  dustStart();
+
+  /* ============================================================
+     MediaPipe 手势识别
+     ============================================================ */
+  var video = document.getElementById('video');
+  var canvas = document.getElementById('overlay');
+  var ctx = canvas.getContext('2d');
+  var hands = null, running = false, camOn = false;
+
+  var CONNECTIONS = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],
+    [11,12],[9,13],[13,14],[14,15],[13,17],[17,18],[18,19],[19,20],[0,17]];
+
+  var openFrames = 0, twoBase = null, cooldown = 0;
+
+  function dist(a, b){ var dx = a.x - b.x, dy = a.y - b.y; return Math.hypot(dx, dy); }
+  function handScale(lm){ return dist(lm[0], lm[9]) || 1e-6; }
+  function isFist(lm){
+    var w = lm[0], folded = 0;
+    [[8,6],[12,10],[16,14],[20,18]].forEach(function(p){
+      if(dist(lm[p[0]], w) < dist(lm[p[1]], w)) folded++;
+    });
+    return folded >= 3;
+  }
+  function isOpen(lm){
+    var w = lm[0], ext = 0;
+    [[8,6],[12,10],[16,14],[20,18]].forEach(function(p){
+      if(dist(lm[p[0]], w) > dist(lm[p[1]], w) * 1.12) ext++;
+    });
+    return ext >= 4;
+  }
+
+  function onResults(res){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var lms = res.multiHandLandmarks || [];
+    /* 画骨架 */
+    lms.forEach(function(lm){
+      ctx.strokeStyle = 'rgba(232,182,79,.9)'; ctx.lineWidth = 2;
+      CONNECTIONS.forEach(function(c){
+        ctx.beginPath();
+        ctx.moveTo(lm[c[0]].x * canvas.width, lm[c[0]].y * canvas.height);
+        ctx.lineTo(lm[c[1]].x * canvas.width, lm[c[1]].y * canvas.height);
+        ctx.stroke();
+      });
+      lm.forEach(function(p){
+        ctx.beginPath();
+        ctx.arc(p.x * canvas.width, p.y * canvas.height, 2.6, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff3d6'; ctx.fill();
+      });
+    });
+
+    var now = Date.now();
+    if(now < cooldown) return;
+
+    /* ---- 手势判定 ---- */
+    if(lms.length === 1 && state === 'idle'){
+      var lm = lms[0];
+      if(isOpen(lm)){
+        openFrames++;
+      }else if(isFist(lm) && openFrames >= 2){
+        openFrames = 0; cooldown = now + 1500;
+        var cx = lm[9].x * cam.clientWidth, cy = lm[9].y * cam.clientHeight;
+        setHud('检测到握拳！抓取中…', 'ok');
+        doGrab(cx, cy);
+      }else{
+        openFrames = Math.max(0, openFrames - 1);
+      }
+      if(isOpen(lm)) setHud('张开手掌 ✓ 握拳即可抓取盲盒', '');
+      else if(isFist(lm)) setHud(openFrames >= 2 ? '检测到握拳！抓取中…' : '握拳', 'ok');
+    }
+
+    if(state === 'cleaning' || state === 'cleaned'){
+      /* 掌心平移 → 擦除尘土（x 取镜像翻转，与画面中手的位置一致） */
+      if(state === 'cleaning' && lms.length >= 1){
+        var l1 = lms[0], sx = 0, sy = 0;
+        [0, 5, 9, 13, 17].forEach(function(i){ sx += l1[i].x; sy += l1[i].y; });
+        sx /= 5; sy /= 5;
+        var wr = itemwrap.getBoundingClientRect(), cr4 = cam.getBoundingClientRect();
+        var lx = (1 - sx) * cam.clientWidth - (wr.left - cr4.left);
+        var ly = sy * cam.clientHeight - (wr.top - cr4.top);
+        if(lx > -24 && ly > -24 && lx < wr.width + 24 && ly < wr.height + 24){
+          eraseAt(lx, ly, 30);
+          setHud('擦拭中… 已清理 ' + Math.round(cleanPct / (CW * CH) * 100) + '%', 'ok');
+        }
+      }
+      /* 双手拉开（需清理完成） */
+      if(lms.length === 2){
+        var d2 = dist(lms[0][0], lms[1][0]) * cam.clientWidth;
+        if(twoBase == null){ twoBase = d2; }
+        else if(d2 > twoBase * 1.45 && twoBase > 30){
+          twoBase = null; cooldown = now + 1500;
+          if(state === 'cleaned'){ setHud('检测到双手拉开！', 'ok'); pullApart(); }
+          else if(now - pullHintAt > 2500){
+            pullHintAt = now;
+            toast('先把文物清理干净，再拉开听故事哦');
+          }
+        }
+      }else twoBase = null;
+    }
+  }
+
+  async function loop(){
+    if(!running) return;
+    if(video.readyState >= 2){ try{ await hands.send({ image: video }); }catch(e){} }
+    if(running) requestAnimationFrame(loop);
+  }
+
+  document.getElementById('camBtn').onclick = async function(){
+    var btn = this;
+    if(camOn){ running = false; camOn = false;
+      if(video.srcObject) video.srcObject.getTracks().forEach(function(t){ t.stop(); });
+      cam.classList.remove('cam-on');
+      document.getElementById('mpTag').textContent = '● 未开启';
+      btn.textContent = '📷 开启手势识别'; setHud('摄像头已关闭，可用演示按钮继续', 'off');
+      document.getElementById('hudDot').className = 'dot off';
+      dustStart();
+      return;
+    }
+    btn.textContent = '⏳ 启动中…';
+    try{
+      var stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false
+      });
+      video.srcObject = stream;
+      await video.play();
+      if(typeof Hands === 'undefined'){
+        btn.textContent = '📷 开启手势识别';
+        toast('手势识别组件加载失败（需联网），请使用演示按钮');
+        return;
+      }
+      if(!hands){
+        hands = new Hands({ locateFile: function(f){
+          return 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/' + f;
+        }});
+        hands.setOptions({ maxNumHands: 2, modelComplexity: 0, minDetectionConfidence: .6, minTrackingConfidence: .5 });
+        hands.onResults(onResults);
+      }
+      camOn = true; running = true;
+      canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
+      cam.classList.add('cam-on');
+      document.getElementById('mpTag').textContent = '● 识别中';
+      btn.textContent = '⏹ 关闭摄像头';
+      setHud('手势识别已开启：先张开手掌，再握拳抓取', 'ok');
+      document.getElementById('hudDot').className = 'dot ok';
+      dustStop();   // 摄像头识别时暂停背景粒子，把算力留给手势识别
+      loop();
+    }catch(e){
+      btn.textContent = '📷 开启手势识别';
+      toast('摄像头开启失败：' + (e.message || e.name) + '，可用演示按钮');
+    }
+  };
+
+  setHud('点击「开启手势识别」授权摄像头，或直接用演示按钮', 'off');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人中心 · 城市记忆盲盒</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.profile{border:1.5px solid var(--ink);border-radius:var(--r-lg);padding:18px 16px;display:flex;align-items:center;gap:14px}
+.avwrap{position:relative;cursor:pointer;flex:0 0 auto;user-select:none}
+.avwrap .cam{
+  position:absolute;right:-3px;bottom:-3px;width:24px;height:24px;border-radius:50%;
+  background:var(--ink);color:#fff8ef;display:flex;align-items:center;justify-content:center;
+  font-size:12px;border:2px solid var(--card);transition:background .15s;
+}
+.avwrap:hover .cam{background:var(--seal)}
+.stats{display:flex;gap:10px}
+.stat{
+  flex:1;border:1.5px solid var(--ink);border-radius:var(--r-md);padding:13px 0 11px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--card);
+  cursor:pointer;transition:transform .12s, background .15s;user-select:none;
+}
+.stat:hover{background:#fbf5e8}
+.stat:active{transform:scale(.97)}
+.stat b{font-size:20px;font-family:var(--serif);color:var(--seal)}
+.stat span{font-size:11.5px;color:var(--ink-2)}
+/* 明细弹窗列表 */
+.dlist{display:flex;flex-direction:column}
+.drow{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px dashed var(--line);text-decoration:none;color:var(--ink)}
+.drow:last-child{border-bottom:none}
+.drow:hover{background:#fbf5e8}
+.drow .dthumb{
+  width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:19px;border:1px solid var(--line);flex:0 0 38px;
+}
+.drow b{font-size:13px;display:block;line-height:1.4}
+.drow .dmeta{font-size:11px;color:var(--ink-3)}
+.drow .chev{margin-left:auto;color:var(--ink-3)}
+.dfoot{margin-top:10px;text-align:center}
+.dfoot a{font-size:12px;color:var(--seal);text-decoration:none}
+.menus{display:flex;flex-direction:column;gap:9px}
+</style>
+</head>
+<body>
+<div class="page-tag"><b>09</b>&nbsp;个人中心 · PROFILE</div>
+<div class="phone">
+  <div class="topbar">
+    <a class="back" href="03-home.html">←</a>
+    <div class="title">个人中心</div>
+    <div class="spacer"></div>
+    <span class="chip ghost" id="loginType">—</span>
+  </div>
+
+  <div class="profile">
+    <div class="avwrap" id="avwrap" title="点击更换头像">
+      <div id="avatarBox"></div>
+      <span class="cam">📷</span>
+      <input type="file" id="avatarInput" accept="image/*" style="display:none">
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:17px;font-weight:700;font-family:var(--serif)" id="nickText">—</div>
+      <div style="font-size:12px;color:var(--ink-3);margin-top:3px" id="phoneText">—</div>
+    </div>
+    <span class="chip ghost click" id="editNick">✏️ 编辑资料</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat" id="statCollect" title="点击查看收藏明细"><b id="stCollect">0</b><span>收藏物件</span></div>
+    <div class="stat" id="statHistory" title="点击查看浏览明细"><b id="stHistory">0</b><span>浏览记录</span></div>
+    <div class="stat" id="statCity" title="点击查看探索城市"><b id="stCity">0</b><span>探索城市</span></div>
+  </div>
+
+  <div class="menus">
+    <div class="menurow" id="mPwd"><span>🔑</span>修改密码<span class="chev">›</span></div>
+    <a class="menurow" href="02-location.html"><span>🏙️</span>我的城市<span class="sub" id="myCity" style="margin-left:8px"></span><span class="chev">›</span></a>
+    <div class="menurow" id="mClear"><span>🧹</span>清除缓存<span class="sub" style="margin-left:8px">收藏 / 记录 / 图鉴</span><span class="chev">›</span></div>
+    <div class="menurow" id="mAbout"><span>📜</span>关于项目<span class="chev">›</span></div>
+  </div>
+
+  <button class="btn danger" id="logoutBtn" type="button">退出登录</button>
+  <div class="note">城市记忆盲盒 · 课程作业（AI + 手势识别）<br>数据保存在本机浏览器，正式版将接入云开发</div>
+  <div class="tabbar"></div>
+</div>
+<nav class="pager"><a href="08-card.html">‹ 上一页</a><a href="index.html">返回总览</a></nav>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function(){
+  var user = requireLogin();
+  renderTabbar('me');
+
+  function render(){
+    document.getElementById('avatarBox').innerHTML = avatarHtml(user, 58);
+    document.getElementById('nickText').textContent = user.nick;
+    document.getElementById('phoneText').textContent = user.isWx ? '微信一键登录（模拟）' : maskPhone(user.phone);
+    document.getElementById('loginType').textContent = user.isWx ? '微信用户' : '手机用户';
+
+    var collected = Biz.collected();
+    var cities = {};
+    Object.keys(collected).forEach(function(id){
+      if(ITEM_DATA[id]) cities[ITEM_DATA[id].city] = 1;
+    });
+    document.getElementById('stCollect').textContent = Object.keys(collected).length;
+    document.getElementById('stHistory').textContent = Biz.history().length;
+    document.getElementById('stCity').textContent = Object.keys(cities).length;
+    document.getElementById('myCity').textContent = CITY_DATA[Biz.city()].name;
+  }
+  render();
+
+  /* ---------- 统计明细弹窗 ---------- */
+  function row(href, thumb, thumbBg, name, meta){
+    return '<a class="drow" href="' + href + '">' +
+      '<span class="dthumb" style="background:' + thumbBg + '">' + thumb + '</span>' +
+      '<span style="flex:1;min-width:0"><b>' + name + '</b><span class="dmeta">' + meta + '</span></span>' +
+      '<span class="chev">›</span></a>';
+  }
+  function dfoot(href, text){
+    return '<div class="dfoot"><a href="' + href + '">' + text + ' ›</a></div>';
+  }
+
+  document.getElementById('statCollect').onclick = function(){
+    var c = Biz.collected();
+    var ids = Object.keys(c).sort(function(a, b){ return c[b] - c[a]; });
+    if(!ids.length){
+      openDialog({ title: '收藏明细', hideCancel: true, okText: '知道了',
+        html: '<p style="text-align:center;line-height:2">还没有收藏任何物件<br>去抓个盲盒，把老物件收进图鉴吧</p>' + dfoot('04-grab.html', '去抓取盲盒') });
+      return;
+    }
+    openDialog({ title: '收藏明细 · ' + ids.length + ' 件', hideCancel: true, okText: '收好',
+      html: '<div class="dlist">' + ids.map(function(id){
+        var it = ITEM_DATA[id];
+        return row('05-chat.html?item=' + id, it.emoji, 'hsl(' + it.hue + ',42%,90%)',
+          it.name, CITY_DATA[it.city].name + ' · ' + it.era + ' · ' + fmtDate(c[id]) + ' 收藏');
+      }).join('') + '</div>' + dfoot('06-collection.html', '进入图鉴') });
+  };
+
+  document.getElementById('statHistory').onclick = function(){
+    var h = Biz.history();
+    if(!h.length){
+      openDialog({ title: '浏览明细', hideCancel: true, okText: '知道了',
+        html: '<p style="text-align:center;line-height:2">还没有浏览记录<br>抓一个盲盒开始探索吧</p>' + dfoot('04-grab.html', '去抓取盲盒') });
+      return;
+    }
+    openDialog({ title: '浏览明细 · 最近 ' + Math.min(h.length, 12) + ' 条', hideCancel: true, okText: '收好',
+      html: '<div class="dlist">' + h.slice(0, 12).map(function(r){
+        var it = ITEM_DATA[r.item];
+        if(!it) return '';
+        return row('05-chat.html?item=' + it.id, it.emoji, 'hsl(' + it.hue + ',42%,90%)',
+          it.name, CITY_DATA[it.city].name + ' · ' + dayLabel(r.ts) + ' ' + fmtTime(r.ts) +
+          (Biz.isCollected(it.id) ? ' · 已收藏' : ''));
+      }).join('') + '</div>' + dfoot('07-history.html', '进入浏览记录页') });
+  };
+
+  document.getElementById('statCity').onclick = function(){
+    var collected = Biz.collected();
+    var any = Object.keys(CITY_DATA).some(function(cid){
+      return CITY_DATA[cid].items.some(function(id){ return collected[id]; });
+    });
+    openDialog({ title: '探索城市', hideCancel: true, okText: '收好',
+      html: '<div class="dlist">' + Object.keys(CITY_DATA).map(function(cid){
+        var city = CITY_DATA[cid];
+        var got = city.items.filter(function(id){ return collected[id]; }).length;
+        var explored = got > 0;
+        var meta = explored
+          ? '已探索 · 收集 ' + got + '/' + city.items.length + ' 件' +
+            (Biz.checkHidden(cid) ? ' · 🗝️ 隐藏故事已解锁' : ' · 🔒 集齐解锁隐藏故事')
+          : '未探索 · 还没有收到这座城市的物件';
+        return row('06-collection.html?city=' + cid, '🏙️', 'hsl(' + (cid === 'zhengding' ? 26 : 210) + ',42%,90%)',
+          city.name + ' · ' + city.tagline, meta);
+      }).join('') + '</div>' +
+      (any ? dfoot('02-location.html', '切换/重新定位城市') : '') });
+  };
+
+  /* ---------- 更换头像 ---------- */
+  document.getElementById('avwrap').onclick = function(){
+    document.getElementById('avatarInput').click();
+  };
+  document.getElementById('avatarInput').addEventListener('change', function(){
+    var f = this.files && this.files[0];
+    this.value = '';
+    if(!f) return;
+    saveAvatar(f, function(dataUrl){
+      setUserAvatar(dataUrl);
+      user = Session.current();
+      render();
+      toast('头像已更新 ✓');
+    });
+  });
+
+  /* 编辑昵称 */
+  document.getElementById('editNick').onclick = function(){
+    openDialog({
+      title: '编辑昵称',
+      html: '<div class="field" style="margin-bottom:8px"><input id="newNick" maxlength="12" value="' + escapeHtml(user.nick) + '" placeholder="输入新昵称"></div>' +
+            '<p style="font-size:11px;color:var(--ink-3);text-align:center">小贴士：点击左侧头像可上传自定义头像</p>',
+      okText: '保存',
+      onOk: function(mask){
+        var v = mask.querySelector('#newNick').value.trim();
+        if(!v){ toast('昵称不能为空'); return false; }
+        user.nick = v;
+        Session.login(user);
+        if(!user.isWx){
+          var users = Store.get('users', {});
+          if(users[user.phone]){ users[user.phone].nick = v; Store.set('users', users); }
+        }
+        toast('昵称已更新');
+        render();
+      }
+    });
+  };
+
+  /* 修改密码 */
+  document.getElementById('mPwd').onclick = function(){
+    if(user.isWx){ toast('微信登录用户无需设置密码'); return; }
+    openDialog({
+      title: '修改密码',
+      html:
+        '<div class="field" style="margin-bottom:9px"><input id="oldPwd" type="password" placeholder="当前密码"></div>' +
+        '<div class="field" style="margin-bottom:9px"><input id="newPwd" type="password" placeholder="新密码（至少6位）"></div>' +
+        '<div class="field"><input id="newPwd2" type="password" placeholder="确认新密码"></div>',
+      okText: '确认修改',
+      onOk: function(mask){
+        var old = mask.querySelector('#oldPwd').value;
+        var n1 = mask.querySelector('#newPwd').value;
+        var n2 = mask.querySelector('#newPwd2').value;
+        var users = Store.get('users', {});
+        var rec = users[user.phone];
+        if(!rec || rec.pwd !== old){ toast('当前密码不正确'); return false; }
+        if(n1.length < 6){ toast('新密码至少 6 位'); return false; }
+        if(n1 !== n2){ toast('两次输入的新密码不一致'); return false; }
+        rec.pwd = n1; Store.set('users', users);
+        toast('密码修改成功 ✓');
+      }
+    });
+  };
+
+  /* 清除缓存 */
+  document.getElementById('mClear').onclick = function(){
+    confirmDialog('将清除收藏、浏览记录、图鉴进度与城市选择（不影响账号密码），确定吗？', function(){
+      Biz.clearAppData();
+      toast('缓存已清除');
+      render();
+    }, { okText: '清除', title: '清除缓存' });
+  };
+
+  /* 关于项目 */
+  document.getElementById('mAbout').onclick = function(){
+    openDialog({
+      title: '关于项目',
+      html:
+        '<p style="font-weight:700;text-align:center;font-family:var(--serif);font-size:15px;margin-bottom:4px">城市记忆盲盒</p>' +
+        '<p style="text-align:center;font-size:11.5px;margin-bottom:10px">以赛促学 · 技术赋能文化创意 · 3人小组课程作业</p>' +
+        '<p style="line-height:2">通过 GPS 定位城市，用手势（握拳 / 捏合 / 拉开）隔空抓取本地老物件盲盒，AI 实时生成城市记忆故事并朗读，支持多轮对话、图鉴收藏与纪念卡分享。首批开通<b>石家庄、正定</b>两城。</p>' +
+        '<p style="font-size:12px;color:var(--ink-2);margin-top:8px;line-height:2">技术：MediaPipe Hands 手势识别 · AI 智能体（DeepSeek API，js/ai-config.js 可配置；未配置时本地知识库兜底）· 浏览器 TTS · Canvas · 本地存储</p>',
+      okText: '知道了', hideCancel: true
+    });
+  };
+
+  /* 退出登录 */
+  document.getElementById('logoutBtn').onclick = function(){
+    confirmDialog('确定退出当前账号吗？', function(){
+      Session.logout();
+      toast('已退出登录');
+      setTimeout(function(){ location.href = '01-login.html'; }, 500);
+    }, { okText: '退出', title: '退出登录' });
+  };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+/* ============================================================
+   城市记忆盲盒 · 最终版 共享样式
+   风格：城市记忆 / 老物件 —— 纸墨底、朱砂红点缀、衬线标题
+   ============================================================ */
+:root{
+  --paper:#f6f1e7;          /* 页面底 */
+  --card:#fffdf6;           /* 卡片 */
+  --ink:#2a251d;            /* 主墨色 */
+  --ink-2:#6f675a;          /* 次级文字 */
+  --ink-3:#a39a8a;          /* 弱文字 */
+  --line:#d8cfbf;           /* 细边线 */
+  --seal:#b5402c;           /* 朱砂红 */
+  --seal-dk:#8f3222;
+  --gold:#c8a24b;           /* 描金 */
+  --green:#3d7a4f;
+  --shadow:0 14px 34px rgba(60,45,20,.12);
+  --r-lg:18px; --r-md:13px; --r-sm:9px;
+  --serif:"Noto Serif SC","Songti SC","STZhongsong","SimSun",serif;
+  --sans:"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:
+    radial-gradient(1100px 500px at 15% -5%, rgba(200,162,75,.10), transparent 60%),
+    radial-gradient(900px 520px at 95% 110%, rgba(181,64,44,.08), transparent 55%),
+    var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  display:flex;flex-direction:column;align-items:center;
+  padding:34px 16px 64px;min-height:100vh;line-height:1.6;
+}
+a{color:inherit}
+
+/* ---------- 作业展示壳：页码标签 + 手机 + 翻页 ---------- */
+.page-tag{font-size:13px;color:var(--ink-3);letter-spacing:3px;margin-bottom:14px}
+.page-tag b{color:var(--seal);font-size:15px;letter-spacing:1px}
+.phone{
+  width:390px;max-width:100%;
+  background:var(--card);
+  border:2px solid var(--ink);border-radius:30px;
+  padding:24px 20px 20px;
+  display:flex;flex-direction:column;gap:16px;
+  box-shadow:var(--shadow);
+  min-height:640px;position:relative;
+}
+.phone.dark{background:#221e18;border-color:#0e0c09;color:#efe7d8}
+.pager{margin-top:18px;display:flex;gap:22px;font-size:13px}
+.pager a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px}
+.pager a:hover{color:var(--seal);border-color:var(--seal)}
+
+/* ---------- 顶栏 ---------- */
+.topbar{display:flex;align-items:center;gap:12px}
+.back{
+  width:34px;height:34px;flex:0 0 34px;border:1.5px solid var(--ink);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  cursor:pointer;background:transparent;color:var(--ink);text-decoration:none;user-select:none;
+}
+.back:hover{background:var(--ink);color:var(--card)}
+.title{font-size:17px;font-weight:700;font-family:var(--serif);letter-spacing:2px}
+.spacer{flex:1}
+
+/* ---------- 通用小组件 ---------- */
+.chip{
+  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+  border:1.5px solid var(--ink);border-radius:999px;
+  font-size:12px;padding:4px 12px;color:var(--ink);cursor:default;
+}
+.chip.ghost{border-color:var(--line);color:var(--ink-2)}
+.chip.seal{border-color:var(--seal);color:var(--seal);background:rgba(181,64,44,.06)}
+.chip.gold{border-color:var(--gold);color:#8a6a1e;background:rgba(200,162,75,.10)}
+.chip.click{cursor:pointer}
+.btn{
+  border:1.5px solid var(--ink);border-radius:999px;padding:13px 0;text-align:center;
+  font-size:15px;font-weight:600;background:var(--card);color:var(--ink);
+  cursor:pointer;user-select:none;transition:transform .06s ease, opacity .2s;
+  text-decoration:none;display:block;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(1px)}
+.btn.solid{background:var(--ink);color:var(--card)}
+.btn.seal{background:var(--seal);border-color:var(--seal);color:#fff8ef}
+.btn.ghost{border-color:var(--line);color:var(--ink-2);font-weight:400}
+.btn.danger{border-color:var(--seal);color:var(--seal);background:transparent}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn.sm{padding:8px 16px;font-size:13px}
+.box{border:1.5px solid var(--ink);border-radius:var(--r-md)}
+.field{
+  display:flex;align-items:center;gap:10px;
+  border:1.5px solid var(--ink);border-radius:var(--r-md);
+  padding:0 15px;height:48px;font-size:14.5px;background:var(--card);
+}
+.field input{flex:1;border:none;outline:none;background:transparent;font-size:14.5px;color:var(--ink);min-width:0}
+.field input::placeholder{color:var(--ink-3)}
+.divider{display:flex;align-items:center;gap:10px;color:var(--ink-3);font-size:12px;letter-spacing:2px}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.note{font-size:12px;color:var(--ink-3);text-align:center;line-height:1.8}
+.avatar{
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:#fff8ef;font-weight:700;flex:0 0 auto;user-select:none;
+  border:1.5px solid var(--ink);
+}
+
+/* ---------- 底部导航 ---------- */
+.tabbar{
+  display:flex;border:1.5px solid var(--ink);border-radius:999px;
+  padding:8px;margin-top:auto;background:var(--card);
+}
+.tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-size:11px;color:var(--ink-3);cursor:pointer;text-decoration:none;border-radius:999px;padding:4px 0;
+}
+.tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2}
+.tab.active{color:var(--seal);font-weight:700}
+.tab.active svg{stroke:var(--seal)}
+.tab:hover{color:var(--seal)}
+
+/* ---------- Toast ---------- */
+#toast{
+  position:fixed;left:50%;bottom:64px;transform:translateX(-50%) translateY(20px);
+  background:rgba(30,26,20,.92);color:#f7f1e4;font-size:13.5px;
+  padding:11px 20px;border-radius:999px;opacity:0;pointer-events:none;
+  transition:all .28s ease;z-index:999;max-width:80vw;text-align:center;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- 模态框 ---------- */
+.mask{
+  position:fixed;inset:0;background:rgba(28,22,14,.5);backdrop-filter:blur(2px);
+  display:none;align-items:center;justify-content:center;z-index:900;padding:20px;
+}
+.mask.show{display:flex}
+.dialog{
+  width:340px;max-width:100%;background:var(--card);border:2px solid var(--ink);
+  border-radius:var(--r-lg);padding:22px 20px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;gap:14px;max-height:82vh;overflow:auto;
+}
+.dialog h3{font-family:var(--serif);font-size:17px;letter-spacing:2px;text-align:center}
+.dialog .actions{display:flex;gap:10px}
+.dialog .actions .btn{flex:1;padding:10px 0;font-size:14px}
+
+/* ---------- 表单校验提示 ---------- */
+.field.err{border-color:var(--seal);animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+/* ---------- 进度条 ---------- */
+.track{flex:1;height:8px;border:1px solid var(--ink-3);border-radius:5px;overflow:hidden;background:var(--card)}
+.fill{height:100%;background:linear-gradient(90deg,var(--seal),var(--gold));transition:width .5s ease}
+
+/* ---------- 通用列表行 ---------- */
+.menurow{
+  border:1.5px solid var(--ink);border-radius:var(--r-md);padding:14px 16px;
+  display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;
+  background:var(--card);text-decoration:none;color:var(--ink);
+}
+.menurow:hover{background:#fbf7ec}
+.menurow .chev{margin-left:auto;color:var(--ink-3);font-size:17px}
+.menurow .sub{font-size:11.5px;color:var(--ink-3)}
+
+/* ---------- 空状态 ---------- */
+.empty{
+  border:1.5px dashed var(--line);border-radius:var(--r-md);
+  padding:28px 16px;text-align:center;color:var(--ink-3);font-size:13px;line-height:2;
+}
+.empty .big{font-size:30px}
+
+/* ---------- 动画工具 ---------- */
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+@media (max-width:430px){ body{padding:18px 8px 48px} .phone{border-radius:24px} }

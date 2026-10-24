@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>首页 · 城市记忆盲盒</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.stage{
+  border:1.5px solid var(--ink);border-radius:var(--r-lg);height:230px;position:relative;overflow:hidden;
+  background:radial-gradient(340px 200px at 50% 108%, rgba(200,162,75,.30), transparent 65%),
+             linear-gradient(180deg,#f4eddc, #e9dcc0);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+}
+.orb{
+  width:104px;height:104px;border-radius:50%;cursor:pointer;position:relative;
+  background:radial-gradient(circle at 32% 30%, #fff6dc, #e8b64f 45%, var(--seal) 100%);
+  box-shadow:0 0 34px rgba(200,162,75,.75), 0 0 70px rgba(181,64,44,.35), inset -8px -12px 22px rgba(120,40,20,.45);
+  animation:floaty 3.2s ease-in-out infinite;
+  display:flex;align-items:center;justify-content:center;font-size:40px;user-select:none;
+}
+.orb::after{content:"";position:absolute;inset:-12px;border-radius:50%;
+  border:1.5px dashed rgba(181,64,44,.55);animation:spinSlow 12s linear infinite}
+.stage .hint{font-size:12px;color:var(--ink-2);letter-spacing:1px}
+.stage .ribbon{position:absolute;top:12px;left:14px;font-family:var(--serif);font-size:12px;color:var(--seal);letter-spacing:3px;opacity:.8}
+.tiles{display:flex;gap:10px}
+.tile{
+  flex:1;border:1.5px solid var(--ink);border-radius:var(--r-md);padding:12px 0 10px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;
+  text-decoration:none;color:var(--ink);background:var(--card);cursor:pointer;
+}
+.tile:hover{background:#fbf5e8}
+.tile .ticon{font-size:21px}
+.rcard{
+  flex:1;border:1.5px solid var(--ink);border-radius:var(--r-md);padding:10px;
+  text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:7px;background:var(--card);
+}
+.rcard .thumb{
+  height:74px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:34px;
+  border:1.5px solid var(--line);
+}
+.rcard b{font-size:12.5px;line-height:1.4}
+.rcard span{font-size:10.5px;color:var(--ink-3)}
+.citymenu{
+  position:absolute;top:56px;right:20px;z-index:50;display:none;flex-direction:column;gap:6px;
+  background:var(--card);border:1.5px solid var(--ink);border-radius:var(--r-md);padding:8px;min-width:150px;
+  box-shadow:var(--shadow);
+}
+.citymenu.show{display:flex}
+.citymenu div{padding:8px 12px;border-radius:8px;font-size:13.5px;cursor:pointer}
+.citymenu div:hover{background:#f4ecd9}
+.citymenu div.on{color:var(--seal);font-weight:700}
+.citymenu .hd{font-size:10.5px;color:var(--ink-3);cursor:default;padding-bottom:2px;letter-spacing:2px}
+.userwrap{position:relative;display:flex;align-items:center;gap:10px;flex:1}
+.progress-wrap{display:flex;align-items:center;gap:8px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="page-tag"><b>03</b>&nbsp;首页 · HOME</div>
+<div class="phone" id="phone">
+  <div class="topbar">
+    <div class="userwrap" id="userBox"></div>
+    <span class="chip click" id="cityChip">— ▾</span>
+  </div>
+
+  <div class="citymenu" id="cityMenu"></div>
+
+  <div class="stage">
+    <span class="ribbon" id="cityRibbon">城市记忆 · 石家庄</span>
+    <div class="orb" id="orb" title="点我抓取">🎁</div>
+    <div class="hint" id="stageHint">光球里藏着一枚老物件 · 点击或做「握拳」手势抓取</div>
+  </div>
+
+  <a class="btn seal" href="04-grab.html" id="grabBtn">抓取城市记忆盲盒</a>
+
+  <div class="tiles">
+    <a class="tile" href="06-collection.html"><span class="ticon">📖</span>图鉴</a>
+    <a class="tile" href="07-history.html"><span class="ticon">🕓</span>浏览记录</a>
+    <a class="tile" id="cardTile"><span class="ticon">💌</span>纪念卡</a>
+    <a class="tile" href="09-profile.html"><span class="ticon">🙂</span>个人中心</a>
+  </div>
+
+  <div style="display:flex;align-items:center;margin-top:0">
+    <span style="font-size:13.5px;font-weight:700;font-family:var(--serif);letter-spacing:1px">最近收集</span>
+    <div class="spacer"></div>
+    <a href="06-collection.html" style="font-size:12px;color:var(--ink-3);text-decoration:none">更多 ›</a>
+  </div>
+  <div style="display:flex;gap:12px" id="recent"></div>
+
+  <div class="tabbar"></div>
+</div>
+<nav class="pager"><a href="02-location.html">‹ 上一页</a><a href="index.html">总览</a><a href="04-grab.html">下一页：手势抓取页 ›</a></nav>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function(){
+  var user = requireLogin();
+  renderTabbar('home');
+
+  var cityId = Biz.city();
+  if(!CITY_DATA[cityId]) cityId = 'shijiazhuang';
+
+  function render(){
+    var city = CITY_DATA[cityId];
+    var collected = Biz.collected();
+    var ids = city.items;
+    var got = ids.filter(function(id){ return collected[id]; }).length;
+
+    /* 用户区 */
+    document.getElementById('userBox').innerHTML =
+      avatarHtml(user, 40) +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-weight:700;font-size:14.5px">' + escapeHtml(user.nick) + '</div>' +
+        '<div class="progress-wrap"><div class="track" style="max-width:150px"><div class="fill" style="width:' + (got / ids.length * 100) + '%"></div></div>' +
+        '<span style="font-size:11px;color:var(--ink-2)">' + got + '/' + ids.length + '</span></div>' +
+      '</div>';
+
+    /* 城市切换 */
+    var chip = document.getElementById('cityChip');
+    chip.textContent = city.name + ' ▾';
+    chip.onclick = function(){ document.getElementById('cityMenu').classList.toggle('show'); };
+    var menu = document.getElementById('cityMenu');
+    menu.innerHTML = '<div class="hd">切换城市</div>' + Object.keys(CITY_DATA).map(function(id){
+      var c = CITY_DATA[id];
+      return '<div class="' + (id === cityId ? 'on' : '') + '" data-id="' + id + '">' +
+        c.name + ' · ' + c.tagline + (id === cityId ? ' ✓' : '') + '</div>';
+    }).join('');
+    menu.querySelectorAll('div[data-id]').forEach(function(d){
+      d.onclick = function(){
+        cityId = d.dataset.id;
+        Biz.setCity(cityId);
+        document.getElementById('cityMenu').classList.remove('show');
+        toast('已切换到「' + CITY_DATA[cityId].name + '」');
+        render();
+      };
+    });
+
+    document.getElementById('cityRibbon').textContent = '城市记忆 · ' + city.name;
+    var gotAll = got >= ids.length;
+    document.getElementById('grabBtn').textContent = gotAll
+      ? '盲盒已集齐 · 再抽一次碰碰运气' : '抓取城市记忆盲盒';
+    document.getElementById('orb').textContent = gotAll ? '✨' : '🎁';
+    document.getElementById('stageHint').textContent = gotAll
+      ? '「' + city.name + '」的记忆已集齐，隐藏故事在图鉴等你'
+      : '光球里藏着一枚老物件 · 点击或做「握拳」手势抓取';
+
+    /* 最近收集（全局，按收集时间倒序取2） */
+    var all = Object.keys(collected).sort(function(a, b){ return collected[b] - collected[a]; });
+    var recentEl = document.getElementById('recent');
+    if(!all.length){
+      recentEl.innerHTML = '<div class="empty" style="flex:1"><div class="big">🫙</div>还没有收集到老物件<br>去首页上方抓一个盲盒吧！</div>';
+    }else{
+      recentEl.innerHTML = all.slice(0, 2).map(function(id){
+        var it = ITEM_DATA[id], ct = CITY_DATA[it.city];
+        return '<a class="rcard" href="05-chat.html?item=' + id + '">' +
+          '<div class="thumb" style="background:hsl(' + it.hue + ',42%,90%)">' + it.emoji + '</div>' +
+          '<b>' + it.name + '</b><span>' + ct.name + ' · ' + fmtDate(collected[id]) + '</span></a>';
+      }).join('');
+    }
+    document.getElementById('cardTile').href =
+      all.length ? '08-card.html?item=' + all[0] : '08-card.html';
+  }
+
+  document.getElementById('orb').onclick = function(){ location.href = '04-grab.html'; };
+  document.addEventListener('click', function(e){
+    var menu = document.getElementById('cityMenu');
+    if(menu.classList.contains('show') && !menu.contains(e.target) && e.target.id !== 'cityChip'){
+      menu.classList.remove('show');
+    }
+  });
+
+  /* 好友接力提示 */
+  var relay = qsParam('relay');
+  if(relay){
+    Store.set('relay', { from: relay, ts: Date.now() });
+    setTimeout(function(){ toast('🎉 好友「' + relay + '」邀请你接力抓取！', 3200); }, 300);
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 · 城市记忆盲盒</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.brand{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:6px;text-align:center}
+.logo{
+  width:58px;height:58px;border-radius:16px;background:var(--ink);color:var(--gold);
+  display:flex;align-items:center;justify-content:center;font-family:var(--serif);
+  font-size:26px;font-weight:700;box-shadow:0 6px 14px rgba(42,37,29,.25);
+}
+.brand h1{font-family:var(--serif);font-size:21px;letter-spacing:6px;text-indent:6px}
+.brand p{font-size:11.5px;color:var(--ink-3);letter-spacing:3px}
+.hero{
+  height:170px;border:1.5px solid var(--ink);border-radius:var(--r-lg);overflow:hidden;
+  position:relative;background:linear-gradient(180deg,#f2ead8 0%,#e9dcc2 55%,#dcc9a4 100%);
+}
+.hero svg{position:absolute;bottom:-2px;left:0;width:100%;height:auto}
+.hero .sun{position:absolute;top:26px;left:32px;width:44px;height:44px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #e8b64f, var(--seal));opacity:.85;animation:floaty 6s ease-in-out infinite}
+.hero .tagline{position:absolute;top:30px;right:20px;font-family:var(--serif);writing-mode:vertical-rl;
+  font-size:14px;letter-spacing:6px;color:var(--seal);opacity:.85}
+.tabs{display:flex;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
+.tabs button{flex:1;border:none;background:transparent;padding:10px 0;font-size:14px;
+  font-family:inherit;color:var(--ink-2);cursor:pointer;letter-spacing:2px}
+.tabs button.on{background:var(--ink);color:var(--card);font-weight:600}
+.err-tip{font-size:12px;color:var(--seal);min-height:16px;text-align:center}
+</style>
+</head>
+<body>
+<div class="page-tag"><b>01</b>&nbsp;登录页 · LOGIN</div>
+<div class="phone">
+  <div class="brand">
+    <div class="logo">城</div>
+    <h1>城市记忆盲盒</h1>
+    <p>AI + 手势识别 · 把城市装进口袋</p>
+  </div>
+
+  <div class="hero">
+    <div class="sun"></div>
+    <div class="tagline">城市记忆 · 岁月留声</div>
+    <svg viewBox="0 0 390 120" preserveAspectRatio="none" fill="none">
+      <path d="M0 120 V70 L30 60 L60 78 L90 50 L120 70 L150 44 L190 72 L230 56 L270 76 L310 48 L350 70 L390 58 V120 Z" fill="#3a332a" opacity=".92"/>
+      <path d="M118 44 V22 M110 22 H126 M104 30 H132" stroke="#3a332a" stroke-width="5"/>
+      <circle cx="150" cy="44" r="5" fill="#b5402c"/>
+      <path d="M0 120 V96 H390 V120" fill="#26211a"/>
+      <path d="M20 104 H80 M20 104 V98 M60 104 V98" stroke="#8f8677" stroke-width="3"/>
+      <path d="M-10 88 H400" stroke="#26211a" stroke-width="6"/>
+    </svg>
+  </div>
+
+  <div class="tabs">
+    <button id="tabLogin" class="on" type="button">登 录</button>
+    <button id="tabReg" type="button">注 册</button>
+  </div>
+
+  <div class="field"><span>📱</span><input id="phone" maxlength="11" placeholder="手机号（11位数字）"></div>
+  <div class="field" id="nickRow" style="display:none"><span>😀</span><input id="nick" maxlength="12" placeholder="昵称（可不填，默认用手机尾号）"></div>
+  <div class="field"><span>🔒</span><input id="pwd" type="password" placeholder="密码（至少6位）"></div>
+  <div class="field" id="pwd2Row" style="display:none"><span>🔒</span><input id="pwd2" type="password" placeholder="确认密码"></div>
+  <div class="err-tip" id="err"></div>
+
+  <button class="btn solid" id="submitBtn" type="button">登&nbsp;&nbsp;录</button>
+
+  <div class="divider">其他登录方式</div>
+  <button class="btn" id="wxBtn" type="button">💬&nbsp;&nbsp;微信一键登录（模拟）</button>
+
+  <div class="note">课程作业演示：账号数据保存在本机浏览器 localStorage，无真实短信/微信校验。<br>首次体验可直接用「微信一键登录」。</div>
+</div>
+<nav class="pager"><a href="index.html">‹ 返回总览</a><a href="02-location.html">下一页：定位页 ›</a></nav>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function(){
+  var mode = 'login';
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* 已登录则直接进首页 */
+  if(Session.current()){
+    toast('已登录，正在进入首页…', 1200);
+    setTimeout(function(){ location.href = '03-home.html'; }, 700);
+    return;
+  }
+
+  function setMode(m){
+    mode = m;
+    $('tabLogin').className = m === 'login' ? 'on' : '';
+    $('tabReg').className = m === 'reg' ? 'on' : '';
+    $('nickRow').style.display = m === 'reg' ? '' : 'none';
+    $('pwd2Row').style.display = m === 'reg' ? '' : 'none';
+    $('submitBtn').textContent = m === 'login' ? '登  录' : '注 册 并 登 录';
+    $('err').textContent = '';
+  }
+  $('tabLogin').onclick = function(){ setMode('login'); };
+  $('tabReg').onclick = function(){ setMode('reg'); };
+
+  function err(msg){
+    $('err').textContent = msg;
+    document.querySelectorAll('.field input').forEach(function(inp){
+      inp.parentElement.classList.remove('err');
+    });
+  }
+  function randHue(){ return Math.floor(Math.random() * 360); }
+
+  function doWxLogin(){
+    var u = Session.current();
+    if(!u){
+      var id = 'wx_' + Math.random().toString(36).slice(2, 8);
+      u = { id: id, phone: id, nick: '微信用户' + id.slice(3).toUpperCase(), hue: randHue(), isWx: true };
+      Session.login(u);
+    }
+    toast('微信登录成功（模拟）');
+    setTimeout(function(){ location.href = '03-home.html'; }, 500);
+  }
+  $('wxBtn').onclick = doWxLogin;
+
+  $('submitBtn').onclick = function(){
+    var phone = $('phone').value.trim();
+    var pwd = $('pwd').value;
+    if(!/^1\d{10}$/.test(phone)) return err('请输入 11 位手机号');
+    if(pwd.length < 6) return err('密码至少 6 位');
+
+    var users = Store.get('users', {});
+    if(mode === 'reg'){
+      if(users[phone]) return err('该手机号已注册，请直接登录');
+      if($('pwd2').value !== pwd) return err('两次输入的密码不一致');
+      var nick = $('nick').value.trim() || ('街坊' + phone.slice(-4));
+      users[phone] = { pwd: pwd, nick: nick, hue: randHue(), createdAt: Date.now() };
+      Store.set('users', users);
+      Session.login({ id: phone, phone: phone, nick: nick, hue: users[phone].hue, isWx: false });
+      toast('注册成功，欢迎来到城市记忆盲盒');
+      setTimeout(function(){ location.href = '02-location.html'; }, 600);
+    }else{
+      var u = users[phone];
+      if(!u || u.pwd !== pwd) return err('账号或密码不正确（未注册？请先注册）');
+      Session.login({ id: phone, phone: phone, nick: u.nick, hue: u.hue, avatar: u.avatar || null, isWx: false });
+      toast('登录成功，欢迎回来，' + u.nick);
+      setTimeout(function(){ location.href = '03-home.html'; }, 600);
+    }
+  };
+  $('pwd').addEventListener('keydown', function(e){ if(e.key === 'Enter') $('submitBtn').click(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>浏览记录 · 城市记忆盲盒</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.date{font-size:11.5px;color:var(--ink-3);margin:4px 0 -2px 2px;letter-spacing:1px}
+.rec{
+  display:flex;align-items:center;gap:12px;border:1.5px solid var(--ink);border-radius:var(--r-md);
+  padding:10px 12px;text-decoration:none;color:var(--ink);background:var(--card);
+}
+.rec:hover{background:#fbf6ea}
+.rec .thumb{
+  width:46px;height:46px;flex:0 0 46px;border-radius:10px;border:1.5px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.rec .meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.rec .meta b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec .meta span{font-size:11px;color:var(--ink-3)}
+.rec .chev{color:var(--ink-3);font-size:17px}
+.headrow{display:flex;align-items:center}
+.headrow .title{flex:1}
+.clear{font-size:11.5px;color:var(--seal);cursor:pointer}
+</style>
+</head>
+<body>
+<div class="page-tag"><b>07</b>&nbsp;浏览记录页 · HISTORY</div>
+<div class="phone">
+  <div class="topbar">
+    <a class="back" href="03-home.html">←</a>
+    <div class="headrow" style="flex:1"><div class="title">浏览记录</div></div>
+    <span class="clear" id="clearBtn">清空</span>
+  </div>
+  <div class="chip ghost" style="align-self:flex-start">按时间倒序 · 保留最近200条</div>
+
+  <div id="list" style="display:flex;flex-direction:column;gap:10px"></div>
+
+  <div class="tabbar"></div>
+</div>
+<nav class="pager"><a href="06-collection.html">‹ 上一页</a><a href="index.html">总览</a><a href="08-card.html">下一页：纪念卡页 ›</a></nav>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function(){
+  requireLogin();
+  renderTabbar('clock');
+
+  function render(){
+    var list = Biz.history().slice().sort(function(a, b){ return b.ts - a.ts; });
+    var box = document.getElementById('list');
+    if(!list.length){
+      box.innerHTML = '<div class="empty" style="margin-top:20px"><div class="big">🕰️</div>还没有浏览记录<br>抓一个盲盒，认识一件老物件吧</div>' +
+        '<a class="btn seal" href="04-grab.html" style="margin-top:14px">去抓取盲盒</a>';
+      return;
+    }
+    var html = '', lastDay = '';
+    list.forEach(function(r){
+      var it = ITEM_DATA[r.item];
+      if(!it) return;
+      var day = dayLabel(r.ts);
+      if(day !== lastDay){ html += '<div class="date">' + day + '</div>'; lastDay = day; }
+      var city = CITY_DATA[it.city];
+      html += '<a class="rec" href="05-chat.html?item=' + it.id + '">' +
+        '<div class="thumb" style="background:hsl(' + it.hue + ',42%,90%)">' + it.emoji + '</div>' +
+        '<div class="meta"><b>' + it.name + '</b><span>' + city.name + ' · ' + fmtTime(r.ts) + '</span></div>' +
+        (Biz.isCollected(it.id) ? '<span class="chip seal" style="font-size:10px;padding:2px 8px">已收藏</span>' : '') +
+        '<span class="chev">›</span></a>';
+    });
+    box.innerHTML = html;
+  }
+
+  document.getElementById('clearBtn').onclick = function(){
+    if(!Biz.history().length){ toast('记录已经是空的啦'); return; }
+    confirmDialog('确定清空全部浏览记录吗？此操作不可恢复。', function(){
+      Store.set('history', []);
+      toast('浏览记录已清空');
+      render();
+    }, { okText: '清空', title: '清空浏览记录' });
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>

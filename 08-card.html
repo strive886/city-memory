@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数字纪念卡 · 城市记忆盲盒</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.mcard{border:1.5px solid var(--ink);border-radius:var(--r-lg);overflow:hidden;background:#fff}
+.mcard canvas{display:block;width:100%;height:auto}
+.headrow{display:flex;align-items:center;gap:10px}
+.btnrow{display:flex;gap:10px}
+.btnrow .btn{flex:1;padding:12px 0;font-size:14px}
+.share{display:flex;justify-content:space-around;padding:2px 6px}
+.sitem{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2);cursor:pointer}
+.sitem .si{
+  width:46px;height:46px;border:1.5px solid var(--ink);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--card);
+}
+.sitem:hover .si{background:#f4ecd9}
+.sitem:active .si{transform:scale(.95)}
+</style>
+</head>
+<body>
+<div class="page-tag"><b>08</b>&nbsp;纪念卡分享页 · CARD</div>
+<div class="phone">
+  <div class="topbar">
+    <a class="back" href="05-chat.html" id="backBtn">←</a>
+    <div class="title">数字纪念卡</div>
+    <div class="spacer"></div>
+    <span class="chip ghost">Canvas 生成</span>
+  </div>
+
+  <div class="mcard"><canvas id="card" width="620" height="880"></canvas></div>
+
+  <div class="btnrow">
+    <button class="btn seal" id="saveBtn" type="button">⬇ 保存到相册</button>
+    <button class="btn" id="shareBtn" type="button">分享朋友圈</button>
+  </div>
+
+  <div class="divider">分享给好友 · 接力抓取</div>
+  <div class="share">
+    <div class="sitem" id="shWx"><span class="si">💬</span>微信好友</div>
+    <div class="sitem" id="shPyq"><span class="si">🌅</span>朋友圈</div>
+    <div class="sitem" id="shLink"><span class="si">🔗</span>复制接力链接</div>
+  </div>
+
+  <div class="note">保存功能将 Canvas 导出为图片下载（演示「保存到相册」）；<br>分享为课程演示模拟，正式版接入微信 JS-SDK。</div>
+</div>
+<nav class="pager"><a href="07-history.html">‹ 上一页</a><a href="index.html">总览</a><a href="09-profile.html">下一页：个人中心 ›</a></nav>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function(){
+  var user = requireLogin();
+
+  var itemId = qsParam('item');
+  if(!itemId || !ITEM_DATA[itemId]){
+    var last = Store.get('lastGrab', null);
+    var collected = Biz.collected();
+    var ids = Object.keys(collected).sort(function(a, b){ return collected[b] - collected[a]; });
+    itemId = (last && ITEM_DATA[last.item]) ? last.item :
+             (ids.length ? ids[0] : 'ticket87');
+  }
+  var item = ITEM_DATA[itemId];
+  var city = CITY_DATA[item.city];
+  document.title = item.name + ' · 数字纪念卡';
+
+  /* ---------- Canvas 绘制纪念卡 ---------- */
+  var cv = document.getElementById('card'), ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height;
+
+  function wrapText(text, x, y, maxW, lh, font){
+    ctx.font = font; ctx.fillStyle = '#4a4237'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    var line = '', lines = [];
+    for(var i = 0; i < text.length; i++){
+      var test = line + text[i];
+      if(ctx.measureText(test).width > maxW && line){ lines.push(line); line = text[i]; }
+      else line = test;
+    }
+    if(line) lines.push(line);
+    lines.forEach(function(l, idx){ ctx.fillText(l, x, y + idx * lh); });
+    return lines.length;
+  }
+  /* 伪二维码：由物件 id 生成的确定性图案 */
+  function drawQR(x, y, size){
+    var seed = 0;
+    for(var i = 0; i < itemId.length; i++) seed = (seed * 131 + itemId.charCodeAt(i)) % 99991;
+    var rnd = function(){ seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+    var n = 11, cell = size / n;
+    ctx.fillStyle = '#2a251d';
+    for(var r = 0; r < n; r++) for(var c = 0; c < n; c++){
+      var corner = (r < 3 && c < 3) || (r < 3 && c > n - 4) || (r > n - 4 && c < 3);
+      if(corner){
+        var edge = (r === 0 || c === 0 || r === 2 || c === 2 || r === 1 && c === 1) &&
+                   !(r === 1 && c === 1 && false);
+        if(!edge && !(r === 1 && c === 1)) continue;
+        if(r === 1 && c === 1){ continue; }
+      }
+      if(corner){ /* 定位框已画，跳过内部 */ }
+      if(!corner && rnd() < .45) ctx.fillRect(x + c * cell, y + r * cell, cell - .8, cell - .8);
+    }
+    /* 三个定位角 */
+    [[0,0],[n-3,0],[0,n-3]].forEach(function(p){
+      ctx.fillStyle = '#2a251d';
+      ctx.fillRect(x + p[0] * cell, y + p[1] * cell, cell * 3, cell * 3);
+      ctx.fillStyle = '#fdf8ec';
+      ctx.fillRect(x + (p[0] + .6) * cell, y + (p[1] + .6) * cell, cell * 1.8, cell * 1.8);
+      ctx.fillStyle = '#2a251d';
+      ctx.fillRect(x + (p[0] + 1.05) * cell, y + (p[1] + 1.05) * cell, cell * .9, cell * .9);
+    });
+  }
+
+  function drawCard(){
+    /* 底 */
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#f8f2e3'); g.addColorStop(1, '#efe4cb');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    /* 双边框 */
+    ctx.strokeStyle = '#2a251d'; ctx.lineWidth = 3; ctx.strokeRect(16, 16, W - 32, H - 32);
+    ctx.strokeStyle = 'rgba(181,64,44,.65)'; ctx.lineWidth = 1.5; ctx.strokeRect(26, 26, W - 52, H - 52);
+    /* 角标印章 */
+    ctx.fillStyle = 'rgba(181,64,44,.1)'; ctx.beginPath(); ctx.arc(W - 88, 120, 46, 0, Math.PI * 2); ctx.fill();
+
+    /* 顶部品牌 */
+    ctx.fillStyle = '#2a251d';
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(46, 46, 40, 40, 10) : ctx.rect(46, 46, 40, 40); ctx.fill();
+    ctx.fillStyle = '#c8a24b'; ctx.font = '24px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('城', 66, 67);
+    ctx.fillStyle = '#2a251d'; ctx.textAlign = 'left';
+    ctx.font = 'bold 21px "Noto Serif SC","Songti SC","SimSun",serif';
+    ctx.fillText('城市记忆盲盒', 100, 58);
+    ctx.font = '12px sans-serif'; ctx.fillStyle = '#8a8377';
+    ctx.fillText('CITY MEMORY BLIND BOX · AI + 手势识别', 100, 80);
+    ctx.textAlign = 'right'; ctx.font = '13px Consolas,monospace'; ctx.fillStyle = '#b5402c';
+    var no = 0; for(var i = 0; i < itemId.length; i++) no = (no * 31 + itemId.charCodeAt(i)) % 1000;
+    ctx.fillText('NO.' + String(no + 1).padStart(3, '0'), W - 50, 60);
+
+    /* 物件主图 */
+    ctx.fillStyle = 'hsl(' + item.hue + ',42%,88%)';
+    ctx.beginPath(); ctx.arc(W / 2, 258, 92, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#c8a24b'; ctx.lineWidth = 2; ctx.setLineDash([4, 5]);
+    ctx.beginPath(); ctx.arc(W / 2, 258, 104, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '92px serif'; ctx.fillText(item.emoji, W / 2, 262);
+
+    /* 名称与年代 */
+    ctx.fillStyle = '#2a251d';
+    ctx.font = 'bold 30px "Noto Serif SC","Songti SC","SimSun",serif';
+    ctx.fillText(item.name, W / 2, 398);
+    ctx.font = '14px sans-serif'; ctx.fillStyle = '#8a8377';
+    ctx.fillText(item.en + '　·　' + item.era + '　·　' + city.name, W / 2, 430);
+
+    /* 分隔线 */
+    ctx.strokeStyle = 'rgba(181,64,44,.4)'; ctx.lineWidth = 1;
+    ctx.setLineDash([6, 5]); ctx.beginPath(); ctx.moveTo(60, 462); ctx.lineTo(W - 60, 462); ctx.stroke(); ctx.setLineDash([]);
+
+    /* AI 故事 */
+    var story = item.story;
+    var used = wrapText(story, 66, 486, W - 132, 30, '16.5px "Noto Serif SC","Songti SC","SimSun",serif');
+
+    /* 手势剪影 */
+    var gy = 500 + used * 30 + 14;
+    ctx.font = '24px serif';
+    ['✊', '🤏', '👐'].forEach(function(e, idx){
+      ctx.fillText(e, W / 2 + (idx - 1) * 58, gy);
+    });
+    ctx.font = '11px sans-serif'; ctx.fillStyle = '#a39a8a';
+    ctx.fillText('握拳抓取 · 捏合旋转 · 双手拉开', W / 2, gy + 22);
+
+    /* 底部：伪二维码 + 署名 */
+    ctx.strokeStyle = 'rgba(42,37,29,.35)'; ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(60, gy + 56); ctx.lineTo(W - 60, gy + 56); ctx.stroke(); ctx.setLineDash([]);
+
+    drawQR(60, gy + 76, 96);
+    ctx.textAlign = 'left'; ctx.fillStyle = '#2a251d';
+    ctx.font = 'bold 17px "Noto Serif SC","Songti SC","SimSun",serif';
+    ctx.fillText(escapeHtml(user.nick) + ' 的城市记忆', 178, gy + 86);
+    ctx.font = '12.5px sans-serif'; ctx.fillStyle = '#8a8377';
+    ctx.fillText(fmtDate(Date.now()) + ' 收藏于「城市记忆盲盒」', 178, gy + 112);
+    ctx.fillStyle = '#b5402c'; ctx.font = '13px "Noto Serif SC","Songti SC",serif';
+    ctx.fillText('把城市装进口袋 🎁', 178, gy + 134);
+  }
+  drawCard();
+
+  /* ---------- 保存到相册（下载 PNG） ---------- */
+  document.getElementById('saveBtn').onclick = function(){
+    try{
+      var a = document.createElement('a');
+      a.download = '城市记忆盲盒·' + item.name + '.png';
+      a.href = cv.toDataURL('image/png');
+      a.click();
+      toast('纪念卡已保存（下载到本地）🖼️');
+    }catch(e){ toast('保存失败：' + e.message); }
+  };
+
+  /* ---------- 分享 ---------- */
+  function relayUrl(){
+    return new URL('04-grab.html?relay=' + encodeURIComponent(user.nick) + '&city=' + item.city, location.href).href;
+  }
+  document.getElementById('shareBtn').onclick = function(){
+    if(navigator.share){
+      cv.toBlob(function(blob){
+        var file;
+        try{ file = new File([blob], 'card.png', { type: 'image/png' }); }catch(e){ file = null; }
+        var opt = { title: '城市记忆盲盒', text: '我在「城市记忆盲盒」解锁了' + item.name + '的故事！' };
+        if(file && navigator.canShare && navigator.canShare({ files: [file] })) opt.files = [file];
+        navigator.share(opt).catch(function(){});
+      });
+    }else{
+      openDialog({
+        title: '分享朋友圈（演示）',
+        html: '<p style="text-align:center;line-height:2.2">🌅 已生成朋友圈分享卡片<br>' +
+              '<b style="color:var(--seal)">' + item.name + ' · ' + city.name + '</b><br>' +
+              '「' + escapeHtml(user.nick) + '」邀请你一起抓取城市记忆</p>' +
+              '<p style="font-size:11.5px;color:var(--ink-3);text-align:center">课程演示环境模拟分享成功<br>正式版接入微信 JS-SDK 后可直接唤起朋友圈</p>',
+        okText: '分享成功 🎉', hideCancel: true
+      });
+    }
+  };
+  function simulateShare(name){
+    openDialog({
+      title: '分享给' + name + '（演示）',
+      html: '<p style="text-align:center;line-height:2.1">已将接力链接发给' + name + '<br>TA 打开后可直接接力抓取盲盒 🤝</p>',
+      okText: '好的', hideCancel: true
+    });
+  }
+  document.getElementById('shWx').onclick = function(){ simulateShare('微信好友'); };
+  document.getElementById('shPyq').onclick = function(){ simulateShare('朋友圈'); };
+  document.getElementById('shLink').onclick = function(){
+    var url = relayUrl();
+    var done = function(){ toast('接力链接已复制，快发给好友吧 🔗'); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(done, function(){ fallbackCopy(url); done(); });
+    }else{ fallbackCopy(url); done(); }
+    function fallbackCopy(t){
+      var ta = document.createElement('textarea');
+      ta.value = t; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); }catch(e){}
+      ta.remove();
+    }
+  };
+})();
+</script>
+</body>
+</html>

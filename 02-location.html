@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>城市定位 · 城市记忆盲盒</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.radar{display:flex;justify-content:center;padding:4px 0}
+.radar svg{animation:none}
+.radar .ring{transform-origin:105px 88px;animation:spinSlow 9s linear infinite}
+.status-line{text-align:center;font-size:13px;color:var(--ink-2);min-height:20px}
+.coords{text-align:center;font-size:11px;color:var(--ink-3);font-family:Consolas,monospace;min-height:14px}
+.cityrow{
+  border:1.5px solid var(--ink);border-radius:var(--r-md);padding:14px 16px;
+  display:flex;align-items:center;gap:12px;cursor:pointer;background:var(--card);transition:background .15s;
+}
+.cityrow:hover{background:#fbf6ea}
+.cityrow .radio{width:18px;height:18px;border:1.5px solid var(--ink);border-radius:50%;flex:0 0 auto}
+.cityrow.on{border-color:var(--seal);box-shadow:0 0 0 1.5px var(--seal)}
+.cityrow.on .radio{background:var(--seal);box-shadow:inset 0 0 0 3.5px var(--card);border-color:var(--seal)}
+.cityrow b{font-size:15.5px;font-family:var(--serif);letter-spacing:2px}
+.cityrow .sub{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.reloc{display:flex;gap:10px;align-items:center;justify-content:center;font-size:12.5px;color:var(--ink-2)}
+.reloc a{color:var(--seal);cursor:pointer;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="page-tag"><b>02</b>&nbsp;定位页 · LOCATION</div>
+<div class="phone">
+  <div class="topbar">
+    <a class="back" href="01-login.html">←</a>
+    <div class="title">城市定位</div>
+    <div class="spacer"></div>
+    <span class="chip ghost" id="gpsChip">GPS · 待定位</span>
+  </div>
+
+  <div class="radar">
+    <svg viewBox="0 0 210 176" width="210" height="176" fill="none">
+      <circle class="ring" cx="105" cy="88" r="70" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="3 9" opacity=".8"/>
+      <circle cx="105" cy="88" r="46" stroke="var(--line)" stroke-dasharray="2 6"/>
+      <path d="M105 50c-16 0-27 11-27 25 0 19 27 44 27 44s27-25 27-44c0-14-11-25-27-25z" fill="var(--seal)" opacity=".92"/>
+      <circle cx="105" cy="74" r="7" fill="#fff6e8"/>
+      <circle cx="40" cy="40" r="2.5" fill="var(--gold)"/><circle cx="176" cy="60" r="2" fill="var(--gold)"/>
+      <circle cx="28" cy="128" r="2" fill="var(--gold)"/><circle cx="184" cy="140" r="2.5" fill="var(--gold)"/>
+    </svg>
+  </div>
+
+  <div class="status-line" id="status">正在获取你的位置…</div>
+  <div class="coords" id="coords"></div>
+
+  <div class="box" style="padding:16px;display:flex;align-items:center;gap:14px">
+    <span style="font-size:26px">🏙️</span>
+    <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+      <span style="font-size:11.5px;color:var(--ink-3)">当前城市</span>
+      <span style="font-size:21px;font-weight:700;letter-spacing:3px;font-family:var(--serif)" id="curCity">—</span>
+    </div>
+    <span class="chip seal" id="matchChip" style="visibility:hidden">定位成功</span>
+  </div>
+
+  <div class="divider">或 · 手动切换城市</div>
+
+  <div id="cityList"></div>
+
+  <button class="btn seal" id="confirmBtn" type="button">确认并进入首页</button>
+  <div class="reloc">📍 定位不准？<a onclick="locate()">重新定位</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="03-home.html">跳过，先用当前城市</a></div>
+</div>
+<nav class="pager"><a href="01-login.html">‹ 上一页</a><a href="index.html">总览</a><a href="03-home.html">下一页：首页 ›</a></nav>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function(){
+  var user = requireLogin();
+  var selected = Biz.city();
+
+  function renderCities(){
+    var html = '';
+    Object.keys(CITY_DATA).forEach(function(id){
+      var c = CITY_DATA[id];
+      html += '<div class="cityrow ' + (id === selected ? 'on' : '') + '" data-id="' + id + '">' +
+        '<span class="radio"></span>' +
+        '<div style="flex:1"><b>' + c.name + '</b><div class="sub">' + c.tagline + ' · ' + c.items.length + '件老物件</div></div>' +
+        '<span class="chip ghost" style="font-size:10.5px">' + c.en + '</span></div>';
+    });
+    document.getElementById('cityList').innerHTML = html;
+    document.querySelectorAll('.cityrow').forEach(function(row){
+      row.onclick = function(){
+        selected = row.dataset.id;
+        document.getElementById('curCity').textContent = CITY_DATA[selected].name;
+        document.getElementById('matchChip').style.visibility = 'hidden';
+        renderCities();
+      };
+    });
+  }
+
+  function distKm(lat1, lng1, lat2, lng2){
+    var r = Math.PI / 180;
+    var a = Math.sin((lat2 - lat1) * r / 2), b = Math.sin((lng2 - lng1) * r / 2);
+    var h = a * a + Math.cos(lat1 * r) * Math.cos(lat2 * r) * b * b;
+    return 2 * 6371 * Math.asin(Math.sqrt(h));
+  }
+
+  window.locate = function(){
+    var st = document.getElementById('status'), co = document.getElementById('coords');
+    var chip = document.getElementById('gpsChip');
+    st.textContent = '正在获取你的位置…'; co.textContent = '';
+    chip.textContent = 'GPS · 定位中';
+    if(!navigator.geolocation){
+      st.textContent = '浏览器不支持定位，请手动选择城市'; chip.textContent = 'GPS · 不可用'; return;
+    }
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var la = pos.coords.latitude, ln = pos.coords.longitude;
+      co.textContent = la.toFixed(4) + '°N, ' + ln.toFixed(4) + '°E';
+      var bestId = null, bestD = 1e9;
+      Object.keys(CITY_DATA).forEach(function(id){
+        var c = CITY_DATA[id];
+        var d = distKm(la, ln, c.lat, c.lng);
+        if(d < bestD){ bestD = d; bestId = id; }
+      });
+      if(bestD < 120){
+        selected = bestId;
+        document.getElementById('curCity').textContent = CITY_DATA[bestId].name;
+        document.getElementById('matchChip').style.visibility = 'visible';
+        st.textContent = '定位成功 · 距「' + CITY_DATA[bestId].name + '」约 ' + Math.round(bestD) + ' 公里';
+        chip.textContent = 'GPS · 已匹配';
+      }else{
+        st.textContent = '当前位置距已开通城市约 ' + Math.round(bestD) + ' 公里，已为你默认石家庄，也可手动切换';
+        chip.textContent = 'GPS · 已定位';
+        if(!CITY_DATA[selected]) selected = 'shijiazhuang';
+      }
+      renderCities();
+    }, function(err){
+      st.textContent = ({1:'定位权限被拒绝，请手动选择城市', 2:'暂时拿不到位置信息', 3:'定位超时，请手动选择'})[err.code] || '定位失败，请手动选择城市';
+      chip.textContent = 'GPS · ' + (err.code === 1 ? '被拒绝' : '失败');
+    }, { enableHighAccuracy: true, timeout: 8000 });
+  };
+
+  document.getElementById('curCity').textContent = CITY_DATA[selected].name;
+  renderCities();
+  locate();
+
+  document.getElementById('confirmBtn').onclick = function(){
+    Biz.setCity(selected);
+    toast('已选择「' + CITY_DATA[selected].name + '」');
+    setTimeout(function(){ location.href = '03-home.html'; }, 450);
+  };
+})();
+</script>
+</body>
+</html>

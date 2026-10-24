@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>城市记忆盲盒 · 网页作业 · 功能完成版</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+body{padding-top:52px}
+.sheet{width:920px;max-width:100%}
+.kicker{font-size:12px;letter-spacing:5px;color:var(--ink-3)}
+h1{font-family:var(--serif);font-size:30px;margin-top:10px;letter-spacing:3px}
+h1 small{font-size:14px;color:var(--seal);font-weight:400;margin-left:12px;letter-spacing:2px}
+.desc{margin-top:12px;font-size:13.5px;color:var(--ink-2);line-height:2;max-width:760px}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.sect{margin-top:34px}
+.sect h2{font-family:var(--serif);font-size:18px;letter-spacing:2px;display:flex;align-items:center;gap:10px}
+.sect h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;border:1.5px solid var(--ink);border-radius:16px;background:var(--card);padding:16px 18px;margin-top:16px}
+.fnode{border:1.5px solid var(--ink);border-radius:10px;padding:8px 14px;font-size:13px;text-decoration:none;color:var(--ink);background:var(--card)}
+.fnode:hover{border-color:var(--seal);color:var(--seal)}
+.arr{color:var(--ink-3)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:16px}
+.card{border:1.5px solid var(--ink);border-radius:14px;background:var(--card);padding:16px 15px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:7px;transition:transform .15s}
+.card:hover{transform:translateY(-2px);border-color:var(--seal)}
+.card .num{font-size:11px;letter-spacing:3px;color:var(--seal)}
+.card h3{font-size:15.5px;font-family:var(--serif);letter-spacing:1px}
+.card p{font-size:12px;color:var(--ink-2);line-height:1.75}
+.card .file{font-size:10.5px;color:var(--ink-3);font-family:Consolas,monospace;margin-top:2px}
+.mods{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.mod{border:1.5px solid var(--line);border-radius:14px;background:var(--card);padding:14px 16px}
+.mod b{font-size:14px;font-family:var(--serif)}
+.mod ul{margin:8px 0 0 18px;font-size:12.5px;color:var(--ink-2);line-height:2}
+.tech{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.startrow{display:flex;gap:12px;margin-top:30px;align-items:center}
+.startrow .btn{width:230px}
+.foot{margin-top:30px;font-size:12px;color:var(--ink-3);text-align:center;line-height:2}
+@media(max-width:760px){.grid{grid-template-columns:1fr 1fr}.mods{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="kicker">COURSE PROJECT · 功能完成版</div>
+  <h1>城市记忆盲盒<small>AI + 手势识别网页</small></h1>
+  <p class="desc">用户打开网页 → 登录 → GPS 定位城市 → 用手势（握拳 / 捏合 / 双手拉开）隔空抓取本地「城市记忆盲盒」→ AI 生成 80 字记忆故事并语音朗读 → 多轮对话提问 → 收藏进个人图鉴 → 生成数字纪念卡分享。首批开通<b>石家庄、正定</b>两座城市，全部数据用浏览器本地存储模拟。</p>
+  <div class="meta">
+    <span class="chip">课程作业 · 以赛促学</span>
+    <span class="chip">3 人小组</span>
+    <span class="chip gold">MediaPipe 手势识别</span>
+    <span class="chip gold">AI 讲述人 + TTS</span>
+    <span class="chip gold">2 城市 · 8 件老物件</span>
+  </div>
+
+  <div class="startrow">
+    <a class="btn seal" id="startBtn" href="01-login.html">▶ 开始体验（从登录进入）</a>
+    <span class="note" style="text-align:left">推荐 Chrome / Edge 打开；<br>手势页支持摄像头识别，也可用演示按钮。</span>
+  </div>
+
+  <div class="sect">
+    <h2>核心流程</h2>
+    <div class="flow">
+      <a class="fnode" href="01-login.html">登录</a><span class="arr">→</span>
+      <a class="fnode" href="02-location.html">GPS 定位 / 选城市</a><span class="arr">→</span>
+      <a class="fnode" href="03-home.html">首页</a><span class="arr">→</span>
+      <a class="fnode" href="04-grab.html">手势抓取</a><span class="arr">→</span>
+      <a class="fnode" href="05-chat.html">AI 讲故事 / 对话</a><span class="arr">→</span>
+      <a class="fnode" href="06-collection.html">图鉴</a><span class="arr">→</span>
+      <a class="fnode" href="07-history.html">浏览记录</a><span class="arr">→</span>
+      <a class="fnode" href="08-card.html">纪念卡分享</a><span class="arr">→</span>
+      <a class="fnode" href="09-profile.html">个人中心</a>
+    </div>
+  </div>
+
+  <div class="sect">
+    <h2>页面清单（分页面可跳转）</h2>
+    <div class="grid">
+      <a class="card" href="01-login.html"><span class="num">01 · 登录</span><h3>账号体系</h3><p>手机号注册 / 登录、微信一键登录（模拟）、本地会话保持。</p><span class="file">01-login.html</span></a>
+      <a class="card" href="02-location.html"><span class="num">02 · 定位</span><h3>定位与城市切换</h3><p>浏览器 Geolocation 就近匹配城市，支持手动切换石家庄 / 正定。</p><span class="file">02-location.html</span></a>
+      <a class="card" href="03-home.html"><span class="num">03 · 首页</span><h3>盲盒舞台</h3><p>头像昵称、收集进度、城市切换菜单、光球舞台、最近收集。</p><span class="file">03-home.html</span></a>
+      <a class="card" href="04-grab.html"><span class="num">04 · 抓取</span><h3>手势交互（核心）</h3><p>摄像头 + MediaPipe Hands：握拳抓取、挥手擦除泥沙「考古清理」文物、双手拉开讲故事；无摄像头可用演示按钮。</p><span class="file">04-grab.html</span></a>
+      <a class="card" href="05-chat.html"><span class="num">05 · 对话</span><h3>AI 记忆讲述人</h3><p>80 字故事打字机呈现、浏览器 TTS 朗读、多轮对话问答、收藏入口。</p><span class="file">05-chat.html</span></a>
+      <a class="card" href="06-collection.html"><span class="num">06 · 图鉴</span><h3>收藏与图鉴</h3><p>已收集 / 未解锁格子、两城切换、集齐四件解锁隐藏故事。</p><span class="file">06-collection.html</span></a>
+      <a class="card" href="07-history.html"><span class="num">07 · 记录</span><h3>浏览记录</h3><p>抓取过的物件按时间倒序、按日分组，支持清空。</p><span class="file">07-history.html</span></a>
+      <a class="card" href="08-card.html"><span class="num">08 · 纪念卡</span><h3>分享与社交</h3><p>Canvas 绘制纪念卡、保存 PNG、模拟分享朋友圈、复制好友接力链接。</p><span class="file">08-card.html</span></a>
+      <a class="card" href="09-profile.html"><span class="num">09 · 我的</span><h3>个人中心</h3><p>资料与统计、修改密码、清除缓存、退出登录、项目介绍。</p><span class="file">09-profile.html</span></a>
+    </div>
+  </div>
+
+  <div class="sect">
+    <h2>功能模块对照（方案书 → 实现）</h2>
+    <div class="mods">
+      <div class="mod"><b>模块1 · 账号体系</b><ul><li>登录 / 注册（本地模拟）✓</li><li>微信一键登录（模拟）✓</li><li>修改密码、昵称编辑 ✓</li></ul></div>
+      <div class="mod"><b>模块2 · 定位与城市</b><ul><li>浏览器 GPS 定位 + 就近匹配 ✓</li><li>手动切换城市（下拉）✓</li></ul></div>
+      <div class="mod"><b>模块3 · 手势交互</b><ul><li>握拳抓取 → 光球炸开 ✓</li><li>挥手清理 · 考古式擦去泥沙 ✓</li><li>双手拉开触发 AI 故事 ✓</li></ul></div>
+      <div class="mod"><b>模块4 · AI 与对话</b><ul><li>80 字城市记忆故事 ✓</li><li>TTS 语音朗读 ✓</li><li>多轮对话 + 知识库 ✓</li></ul></div>
+      <div class="mod"><b>模块5 · 收藏图鉴</b><ul><li>收藏进图鉴 / 未收集灰格 ✓</li><li>浏览记录（时间倒序）✓</li><li>集齐解锁隐藏故事 ✓</li></ul></div>
+      <div class="mod"><b>模块6 · 分享社交</b><ul><li>Canvas 纪念卡 + 保存图片 ✓</li><li>分享朋友圈（模拟 / Web Share）✓</li><li>好友接力抓取链接 ✓</li></ul></div>
+    </div>
+  </div>
+
+  <div class="sect">
+    <h2>技术栈</h2>
+    <div class="tech">
+      <span class="chip ghost">HTML5 / CSS3 / JavaScript（原生）</span>
+      <span class="chip ghost">MediaPipe Hands（CDN，21 关键点）</span>
+      <span class="chip ghost">getUserMedia 摄像头采集</span>
+      <span class="chip ghost">AI：DeepSeek API（js/ai-config.js 配置）+ 本地知识库兜底</span>
+      <span class="chip ghost">SpeechSynthesis TTS</span>
+      <span class="chip ghost">Canvas 纪念卡导出 PNG</span>
+      <span class="chip ghost">Geolocation 定位</span>
+      <span class="chip ghost">localStorage 本地存储</span>
+    </div>
+  </div>
+
+  <div class="foot">城市记忆盲盒 · 功能完成版 —— 双击 index.html 即可开始；详细玩法见 <a href="说明.md" style="color:var(--seal)">说明.md</a></div>
+</div>
+
+<script>
+(function(){
+  /* 已登录则「开始体验」直达首页 */
+  try{
+    if(localStorage.getItem('cmb_session')){
+      document.getElementById('startBtn').href = '03-home.html';
+      document.getElementById('startBtn').textContent = '▶ 继续体验（已登录）';
+    }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

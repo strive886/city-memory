@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的图鉴 · 城市记忆盲盒</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.citytabs{display:flex;gap:8px}
+.citytabs .ctab{
+  flex:1;border:1.5px solid var(--line);border-radius:999px;padding:8px 0;text-align:center;
+  font-size:13.5px;color:var(--ink-2);cursor:pointer;
+}
+.citytabs .ctab.on{border-color:var(--seal);color:var(--seal);font-weight:700;background:rgba(181,64,44,.06)}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.slot{
+  border:1.5px solid var(--ink);border-radius:var(--r-md);padding:8px 5px 9px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
+  text-decoration:none;color:var(--ink);transition:transform .15s;background:var(--card);
+}
+.slot:hover{transform:translateY(-2px)}
+.slot .thumb{
+  width:100%;height:52px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:27px;border:1.5px solid var(--line);
+}
+.slot .nm{font-size:10px;line-height:1.35;text-align:center;color:var(--ink-2);height:27px;overflow:hidden}
+.slot.locked{border-style:dashed;border-color:var(--line);cursor:default;background:#fbf8f0}
+.slot.locked .thumb{background:#f3edde;border-style:dashed;color:#c9bfa9;font-size:22px;font-weight:700}
+.slot .tag{font-size:9px;color:var(--gold);letter-spacing:1px}
+.hiddenbox{
+  border:1.5px dashed var(--seal);border-radius:var(--r-md);padding:13px 15px;
+  display:flex;align-items:center;gap:13px;background:rgba(181,64,44,.04);
+}
+.hiddenbox .hicon{font-size:26px}
+.hiddenbox b{font-size:13px;display:block}
+.hiddenbox .sub{font-size:11px;color:var(--ink-3);margin-top:2px}
+</style>
+</head>
+<body>
+<div class="page-tag"><b>06</b>&nbsp;图鉴页 · COLLECTION</div>
+<div class="phone">
+  <div class="topbar">
+    <a class="back" href="03-home.html">←</a>
+    <div class="title">我的图鉴</div>
+    <div class="spacer"></div>
+    <span class="chip ghost" id="totalChip">—</span>
+  </div>
+
+  <div class="box" style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+    <span style="font-size:13px;font-weight:600;white-space:nowrap" id="progLabel">已收集 —</span>
+    <div class="track"><div class="fill" id="progFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="citytabs" id="cityTabs"></div>
+  <div class="grid4" id="grid"></div>
+
+  <div class="hiddenbox" id="hiddenBox"></div>
+
+  <div class="note">点击已收集的物件可重听 AI 讲故事；集齐一城四件解锁隐藏故事</div>
+  <div class="tabbar"></div>
+</div>
+<nav class="pager"><a href="05-chat.html">‹ 上一页</a><a href="index.html">总览</a><a href="07-history.html">下一页：浏览记录页 ›</a></nav>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function(){
+  requireLogin();
+  renderTabbar('book');
+
+  var cur = qsParam('city') || Biz.city();
+  if(!CITY_DATA[cur]) cur = 'shijiazhuang';
+
+  function render(){
+    var collected = Biz.collected();
+    var totalGot = Object.keys(collected).length, totalAll = 0;
+    var city = CITY_DATA[cur];
+
+    document.getElementById('progLabel').textContent = city.name + ' 已收集 ' +
+      city.items.filter(function(id){ return collected[id]; }).length + ' / ' + city.items.length;
+    document.getElementById('progFill').style.width =
+      (city.items.filter(function(id){ return collected[id]; }).length / city.items.length * 100) + '%';
+
+    Object.keys(CITY_DATA).forEach(function(id){ totalAll += CITY_DATA[id].items.length; });
+    document.getElementById('totalChip').textContent = '两城合计 ' + totalGot + '/' + totalAll;
+
+    document.getElementById('cityTabs').innerHTML = Object.keys(CITY_DATA).map(function(id){
+      var c = CITY_DATA[id];
+      var got = c.items.filter(function(x){ return collected[x]; }).length;
+      return '<div class="ctab ' + (id === cur ? 'on' : '') + '" data-id="' + id + '">' +
+        c.name + ' ' + got + '/' + c.items.length + '</div>';
+    }).join('');
+    document.querySelectorAll('.ctab').forEach(function(t){
+      t.onclick = function(){ cur = t.dataset.id; render(); };
+    });
+
+    document.getElementById('grid').innerHTML = city.items.map(function(id){
+      var it = ITEM_DATA[id];
+      if(collected[id]){
+        return '<a class="slot" href="05-chat.html?item=' + id + '">' +
+          '<div class="thumb" style="background:hsl(' + it.hue + ',42%,90%)">' + it.emoji + '</div>' +
+          '<div class="nm">' + it.name + '</div><span class="tag">' + it.era + '</span></a>';
+      }
+      return '<div class="slot locked"><div class="thumb">?</div>' +
+        '<div class="nm" style="color:#c9bfa9">？？？？</div><span class="tag">未解锁</span></div>';
+    }).join('');
+
+    /* 隐藏故事区 */
+    var hb = document.getElementById('hiddenBox');
+    var unlockedAt = Biz.checkHidden(cur);
+    if(unlockedAt){
+      hb.innerHTML = '<span class="hicon">🗝️</span>' +
+        '<div style="flex:1"><b style="color:var(--seal)">' + city.hidden.title + '</b>' +
+        '<div class="sub">已解锁 · 点击阅读' + city.name + '的隐藏记忆</div></div>' +
+        '<button class="btn sm seal" id="readHidden" type="button">阅读</button>';
+      document.getElementById('readHidden').onclick = showHidden;
+    }else{
+      var got = city.items.filter(function(id){ return collected[id]; }).length;
+      hb.innerHTML = '<span class="hicon">🔒</span>' +
+        '<div style="flex:1"><b>集齐 ' + city.items.length + ' 件 · 解锁隐藏故事</b>' +
+        '<div class="sub">「' + city.name + '」还差 ' + (city.items.length - got) + ' 件，回首页继续抓取吧</div></div>' +
+        '<a class="btn sm ghost" href="04-grab.html">去抓取</a>';
+    }
+  }
+
+  function showHidden(){
+    var h = CITY_DATA[cur].hidden;
+    openDialog({
+      title: h.title,
+      html: '<p style="font-family:var(--serif);line-height:2.15">' + h.text + '</p>',
+      okText: '收好这段记忆', hideCancel: true
+    });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
