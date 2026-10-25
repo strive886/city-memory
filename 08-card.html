@@ -11,6 +11,20 @@
 .headrow{display:flex;align-items:center;gap:10px}
 .btnrow{display:flex;gap:10px}
 .btnrow .btn{flex:1;padding:12px 0;font-size:14px}
+/* ---------- 纪念卡册缩略图 ---------- */
+.thumbstrip{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;-webkit-overflow-scrolling:touch}
+.cthumb{
+  flex:0 0 auto;width:78px;border:1.5px solid var(--line);border-radius:10px;padding:6px 4px 5px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;background:var(--card);
+}
+.cthumb:active{transform:scale(.96)}
+.cthumb .ce{
+  width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:21px;border:1px solid var(--line);
+}
+.cthumb .cn{font-size:10px;color:var(--ink-2);max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cthumb.on{border-color:var(--seal);box-shadow:0 0 0 1px var(--seal)}
+.cthumb.on .cn{color:var(--seal);font-weight:700}
 </style>
 </head>
 <body>
@@ -24,6 +38,8 @@
   </div>
 
   <div class="mcard"><canvas id="card" width="620" height="880"></canvas></div>
+
+  <div class="thumbstrip" id="thumbStrip"></div>
 
   <div class="btnrow">
     <button class="btn seal" id="saveBtn" type="button">⬇ 保存到相册</button>
@@ -47,9 +63,23 @@
     itemId = (last && ITEM_DATA[last.item]) ? last.item :
              (ids.length ? ids[0] : 'ticket87');
   }
+  var curId = itemId;
   var item = ITEM_DATA[itemId];
   var city = CITY_DATA[item.city];
   document.title = item.name + ' · 数字纪念卡';
+
+  /* 切换当前展示的纪念卡（卡册缩略图点击时调用） */
+  function setCur(id){
+    curId = id;
+    item = ITEM_DATA[id];
+    city = CITY_DATA[item.city];
+    document.title = item.name + ' · 数字纪念卡';
+  }
+
+  /* 返回去向：从首页进入回首页，否则回 AI 对话页 */
+  var backHref = '05-chat.html';
+  if(qsParam('from') === 'home' || document.referrer.indexOf('03-home.html') >= 0) backHref = '03-home.html';
+  document.getElementById('backBtn').href = backHref;
 
   /* 二维码内容：扫码直达作业网址（以后改仓库名，同步改这里即可） */
   var siteUrl = 'https://strive886.github.io/city-memory/';
@@ -136,7 +166,7 @@
     ctx.font = '12px sans-serif'; ctx.fillStyle = '#8a8377';
     ctx.fillText('CITY MEMORY BLIND BOX · AI + 手势识别', 100, 80);
     ctx.textAlign = 'right'; ctx.font = '13px Consolas,monospace'; ctx.fillStyle = '#b5402c';
-    var no = 0; for(var i = 0; i < itemId.length; i++) no = (no * 31 + itemId.charCodeAt(i)) % 1000;
+    var no = 0; for(var i = 0; i < curId.length; i++) no = (no * 31 + curId.charCodeAt(i)) % 1000;
     ctx.fillText('NO.' + String(no + 1).padStart(3, '0'), W - 50, 60);
 
     /* 物件主图 */
@@ -188,6 +218,28 @@
     ctx.fillText('把城市装进口袋 🎁', 178, gy + 134);
   }
   drawCard();
+
+  /* ---------- 纪念卡册缩略图 ---------- */
+  function renderStrip(){
+    var cards = Biz.cards().slice().sort(function(a, b){ return b.ts - a.ts; });
+    var el = document.getElementById('thumbStrip');
+    el.innerHTML = cards.map(function(c){
+      var it = ITEM_DATA[c.item];
+      if(!it) return '';
+      return '<div class="cthumb' + (c.item === curId ? ' on' : '') + '" data-id="' + c.item + '">' +
+        '<span class="ce" style="background:hsl(' + it.hue + ',42%,90%)">' + it.emoji + '</span>' +
+        '<span class="cn">' + escapeHtml(it.name) + '</span></div>';
+    }).join('');
+    el.querySelectorAll('.cthumb').forEach(function(t){
+      t.onclick = function(){
+        setCur(t.getAttribute('data-id'));
+        drawCard();
+        renderStrip();
+      };
+    });
+  }
+  Biz.saveCard(itemId);   // 生成/查看过的卡保留在卡册
+  renderStrip();
 
   /* ---------- 保存到相册（下载 PNG） ---------- */
   document.getElementById('saveBtn').onclick = function(){

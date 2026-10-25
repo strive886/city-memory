@@ -226,6 +226,14 @@ var Biz = {
   },
   askCount: function(){ return Store.get('askCount', 0); },             // 向 AI 提问累计次数（成就用）
   addAsk: function(){ Store.set('askCount', this.askCount() + 1); },
+  cards: function(){ return Store.get('cards', []); },                  // 纪念卡册 [{item, ts}]
+  saveCard: function(itemId){                                           // 生成/查看过的卡保留在卡册
+    var c = this.cards();
+    var t = Date.now(), found = false;
+    c.forEach(function(x){ if(x.item === itemId){ x.ts = t; found = true; } });
+    if(!found) c.unshift({ item: itemId, ts: t });
+    Store.set('cards', c);
+  },
   hidden: function(){ return Store.get('hidden', {}); },                // {cityId: ts}
   /* 城市集齐判定：返回解锁时间戳或 null；自动登记 */
   checkHidden: function(cityId){

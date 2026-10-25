@@ -158,8 +158,8 @@
           '<b>' + it.name + '</b><span>' + ct.name + ' · ' + fmtDate(collected[id]) + '</span></a>';
       }).join('');
     }
-    document.getElementById('cardTile').href =
-      all.length ? '08-card.html?item=' + all[0] : '08-card.html';
+    var cardHref = all.length ? '08-card.html?item=' + all[0] : '08-card.html';
+    document.getElementById('cardTile').href = cardHref + (cardHref.indexOf('?') >= 0 ? '&' : '?') + 'from=home';
   }
 
   document.getElementById('orb').onclick = function(){ location.href = '04-grab.html'; };

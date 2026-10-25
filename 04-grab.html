@@ -298,7 +298,10 @@
     dctx2.fillStyle = g;
     dctx2.beginPath(); dctx2.arc(x, y, r, 0, Math.PI * 2); dctx2.fill();
     dctx2.globalCompositeOperation = 'source-over';
-    markCells(x, y, r);
+    markCells(x, y, r);   // 达到 80% 会触发 finishClean
+    if(state === 'cleaning'){
+      setHud('擦拭中… 已清理 ' + Math.round(cleanPct / (CW * CH) * 100) + '%', 'ok');
+    }
     /* 泥屑掉落 */
     var now = Date.now();
     if(now - lastCrumb > 70){
@@ -533,8 +536,7 @@
         var lx = (1 - sx) * cam.clientWidth - (wr.left - cr4.left);
         var ly = sy * cam.clientHeight - (wr.top - cr4.top);
         if(lx > -24 && ly > -24 && lx < wr.width + 24 && ly < wr.height + 24){
-          eraseAt(lx, ly, 30);
-          setHud('擦拭中… 已清理 ' + Math.round(cleanPct / (CW * CH) * 100) + '%', 'ok');
+          eraseAt(lx, ly, 30);   // HUD 进度由 eraseAt 内统一更新
         }
       }
       /* 双手拉开（需清理完成） */
