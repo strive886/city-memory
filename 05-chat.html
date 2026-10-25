@@ -242,10 +242,12 @@
     Biz.collect(itemId);
     Biz.addHistory(itemId);
     toast('已收藏进图鉴 📖');
+    Sfx.play('collect');
     refreshCollect();
     /* 集齐解锁隐藏故事 */
     var unlockedAt = Biz.checkHidden(item.city);
     if(unlockedAt && Date.now() - unlockedAt < 60000){
+      Sfx.play('achieve');
       var h = CITY_DATA[item.city].hidden;
       openDialog({
         title: '🎉 集齐' + CITY_DATA[item.city].name + '四件！',

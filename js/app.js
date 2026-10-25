@@ -206,6 +206,52 @@ function setUserAvatar(dataUrl){
 }
 window.setUserAvatar = setUserAvatar;
 
+/* ---------- 音效（WebAudio 合成，无音频文件；grab/burst/clean/collect/achieve） ---------- */
+var Sfx = (function(){
+  var ctx = null;
+  function ac(){
+    if(!ctx){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      ctx = new AC();
+    }
+    if(ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  function tone(freq, t0, dur, vol, sweepTo){
+    var a = ac(); if(!a) return;
+    var o = a.createOscillator(), g = a.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq, a.currentTime + t0);
+    if(sweepTo) o.frequency.exponentialRampToValueAtTime(sweepTo, a.currentTime + t0 + dur);
+    g.gain.setValueAtTime(0.0001, a.currentTime + t0);
+    g.gain.exponentialRampToValueAtTime(vol || .16, a.currentTime + t0 + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + t0 + dur);
+    o.connect(g).connect(a.destination);
+    o.start(a.currentTime + t0); o.stop(a.currentTime + t0 + dur + .05);
+  }
+  function noise(t0, dur, vol){
+    var a = ac(); if(!a) return;
+    var len = Math.floor(a.sampleRate * dur);
+    var buf = a.createBuffer(1, len, a.sampleRate);
+    var d = buf.getChannelData(0);
+    for(var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    var src = a.createBufferSource(); src.buffer = buf;
+    var g = a.createGain(); g.gain.value = vol || .2;
+    src.connect(g).connect(a.destination);
+    src.start(a.currentTime + t0);
+  }
+  var fx = {
+    grab:    function(){ tone(420, 0, .18, .14, 900); },                     // 上滑提示
+    burst:   function(){ noise(0, .25, .2); tone(150, 0, .3, .22, 60); },    // 噪声+低音"砰"
+    clean:   function(){ tone(880, 0, .7, .11); tone(1318, .03, .9, .07); }, // 小钟鸣
+    collect: function(){ tone(659, 0, .1, .13); tone(880, .09, .2, .14); },  // 两音上跳
+    achieve: function(){ tone(523, 0, .12, .13); tone(659, .1, .12, .13); tone(784, .2, .28, .15); } // 三连音
+  };
+  return { play: function(name){ try{ if(fx[name]) fx[name](); }catch(e){} } };
+})();
+window.Sfx = Sfx;
+
 /* ---------- 业务数据读写 ---------- */
 var Biz = {
   city: function(){ return Store.get('city', 'shijiazhuang'); },
