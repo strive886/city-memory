@@ -11,14 +11,6 @@
 .headrow{display:flex;align-items:center;gap:10px}
 .btnrow{display:flex;gap:10px}
 .btnrow .btn{flex:1;padding:12px 0;font-size:14px}
-.share{display:flex;justify-content:space-around;padding:2px 6px}
-.sitem{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2);cursor:pointer}
-.sitem .si{
-  width:46px;height:46px;border:1.5px solid var(--ink);border-radius:50%;
-  display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--card);
-}
-.sitem:hover .si{background:#f4ecd9}
-.sitem:active .si{transform:scale(.95)}
 </style>
 </head>
 <body>
@@ -35,20 +27,12 @@
 
   <div class="btnrow">
     <button class="btn seal" id="saveBtn" type="button">⬇ 保存到相册</button>
-    <button class="btn" id="shareBtn" type="button">分享朋友圈</button>
+    <button class="btn" id="relayBtn" type="button">复制接力链接</button>
   </div>
-
-  <div class="divider">分享给好友 · 接力抓取</div>
-  <div class="share">
-    <div class="sitem" id="shWx"><span class="si">💬</span>微信好友</div>
-    <div class="sitem" id="shPyq"><span class="si">🌅</span>朋友圈</div>
-    <div class="sitem" id="shLink"><span class="si">🔗</span>复制接力链接</div>
-  </div>
-
-  <div class="note">保存功能将 Canvas 导出为图片下载（演示「保存到相册」）；<br>分享为课程演示模拟，正式版接入微信 JS-SDK。</div>
 </div>
 <nav class="pager"><a href="07-history.html">‹ 上一页</a><a href="index.html">总览</a><a href="09-profile.html">下一页：个人中心 ›</a></nav>
 
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
 <script>
@@ -67,6 +51,9 @@
   var city = CITY_DATA[item.city];
   document.title = item.name + ' · 数字纪念卡';
 
+  /* 二维码内容：扫码直达作业网址（以后改仓库名，同步改这里即可） */
+  var siteUrl = 'https://strive886.github.io/city-memory/';
+
   /* ---------- Canvas 绘制纪念卡 ---------- */
   var cv = document.getElementById('card'), ctx = cv.getContext('2d');
   var W = cv.width, H = cv.height;
@@ -83,8 +70,23 @@
     lines.forEach(function(l, idx){ ctx.fillText(l, x, y + idx * lh); });
     return lines.length;
   }
-  /* 伪二维码：由物件 id 生成的确定性图案 */
+  /* 真二维码：qrcode-generator 生成，扫码直达作业网址；库未加载成功（离线）时退回装饰图案 */
   function drawQR(x, y, size){
+    if(typeof qrcode === 'undefined'){ drawPseudoQR(x, y, size); return; }
+    var qr = qrcode(0, 'M');
+    qr.addData(siteUrl);
+    qr.make();
+    var n = qr.getModuleCount();
+    var cell = size / (n + 8);          // 四周留 4 模块静区
+    var off = 4 * cell;
+    ctx.fillStyle = '#2a251d';
+    for(var r = 0; r < n; r++) for(var c = 0; c < n; c++){
+      if(qr.isDark(r, c)) ctx.fillRect(x + off + c * cell, y + off + r * cell, cell + .5, cell + .5);
+    }
+  }
+
+  /* 装饰性伪二维码（离线兜底）：由物件 id 生成的确定性图案 */
+  function drawPseudoQR(x, y, size){
     var seed = 0;
     for(var i = 0; i < itemId.length; i++) seed = (seed * 131 + itemId.charCodeAt(i)) % 99991;
     var rnd = function(){ seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
@@ -160,20 +162,23 @@
     var story = item.story;
     var used = wrapText(story, 66, 486, W - 132, 30, '16.5px "Noto Serif SC","Songti SC","SimSun",serif');
 
-    /* 手势剪影 */
-    var gy = 500 + used * 30 + 14;
-    ctx.font = '24px serif';
-    ['✊', '🤏', '👐'].forEach(function(e, idx){
-      ctx.fillText(e, W / 2 + (idx - 1) * 58, gy);
+    /* 手势剪影：图标与文字一一对齐 */
+    var gy = 500 + used * 30 + 8;
+    var steps = [['✊', '握拳抓取'], ['🖐', '挥手清理'], ['👐', '双手拉开']];
+    ctx.textAlign = 'center';
+    steps.forEach(function(s, idx){
+      var x = W / 2 + (idx - 1) * 108;
+      ctx.font = '24px serif'; ctx.fillStyle = '#4a4237';
+      ctx.fillText(s[0], x, gy);
+      ctx.font = '11px sans-serif'; ctx.fillStyle = '#a39a8a';
+      ctx.fillText(s[1], x, gy + 24);
     });
-    ctx.font = '11px sans-serif'; ctx.fillStyle = '#a39a8a';
-    ctx.fillText('握拳抓取 · 捏合旋转 · 双手拉开', W / 2, gy + 22);
 
     /* 底部：伪二维码 + 署名 */
     ctx.strokeStyle = 'rgba(42,37,29,.35)'; ctx.setLineDash([5, 4]);
     ctx.beginPath(); ctx.moveTo(60, gy + 56); ctx.lineTo(W - 60, gy + 56); ctx.stroke(); ctx.setLineDash([]);
 
-    drawQR(60, gy + 76, 96);
+    drawQR(58, gy + 70, 104);
     ctx.textAlign = 'left'; ctx.fillStyle = '#2a251d';
     ctx.font = 'bold 17px "Noto Serif SC","Songti SC","SimSun",serif';
     ctx.fillText(escapeHtml(user.nick) + ' 的城市记忆', 178, gy + 86);
@@ -195,40 +200,11 @@
     }catch(e){ toast('保存失败：' + e.message); }
   };
 
-  /* ---------- 分享 ---------- */
+  /* ---------- 复制接力链接：好友打开直达抓取页 ---------- */
   function relayUrl(){
     return new URL('04-grab.html?relay=' + encodeURIComponent(user.nick) + '&city=' + item.city, location.href).href;
   }
-  document.getElementById('shareBtn').onclick = function(){
-    if(navigator.share){
-      cv.toBlob(function(blob){
-        var file;
-        try{ file = new File([blob], 'card.png', { type: 'image/png' }); }catch(e){ file = null; }
-        var opt = { title: '城市记忆盲盒', text: '我在「城市记忆盲盒」解锁了' + item.name + '的故事！' };
-        if(file && navigator.canShare && navigator.canShare({ files: [file] })) opt.files = [file];
-        navigator.share(opt).catch(function(){});
-      });
-    }else{
-      openDialog({
-        title: '分享朋友圈（演示）',
-        html: '<p style="text-align:center;line-height:2.2">🌅 已生成朋友圈分享卡片<br>' +
-              '<b style="color:var(--seal)">' + item.name + ' · ' + city.name + '</b><br>' +
-              '「' + escapeHtml(user.nick) + '」邀请你一起抓取城市记忆</p>' +
-              '<p style="font-size:11.5px;color:var(--ink-3);text-align:center">课程演示环境模拟分享成功<br>正式版接入微信 JS-SDK 后可直接唤起朋友圈</p>',
-        okText: '分享成功 🎉', hideCancel: true
-      });
-    }
-  };
-  function simulateShare(name){
-    openDialog({
-      title: '分享给' + name + '（演示）',
-      html: '<p style="text-align:center;line-height:2.1">已将接力链接发给' + name + '<br>TA 打开后可直接接力抓取盲盒 🤝</p>',
-      okText: '好的', hideCancel: true
-    });
-  }
-  document.getElementById('shWx').onclick = function(){ simulateShare('微信好友'); };
-  document.getElementById('shPyq').onclick = function(){ simulateShare('朋友圈'); };
-  document.getElementById('shLink').onclick = function(){
+  document.getElementById('relayBtn').onclick = function(){
     var url = relayUrl();
     var done = function(){ toast('接力链接已复制，快发给好友吧 🔗'); };
     if(navigator.clipboard && navigator.clipboard.writeText){

@@ -224,6 +224,8 @@ var Biz = {
     h.unshift({ item: itemId, ts: ts || Date.now() });
     Store.set('history', h.slice(0, 200));
   },
+  askCount: function(){ return Store.get('askCount', 0); },             // 向 AI 提问累计次数（成就用）
+  addAsk: function(){ Store.set('askCount', this.askCount() + 1); },
   hidden: function(){ return Store.get('hidden', {}); },                // {cityId: ts}
   /* 城市集齐判定：返回解锁时间戳或 null；自动登记 */
   checkHidden: function(cityId){

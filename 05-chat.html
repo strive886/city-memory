@@ -205,6 +205,7 @@
   }
   function ask(question){
     if(!question.trim()) return;
+    Biz.addAsk();   // 累计提问次数（个人中心成就「打破砂锅」用）
     addBubble('me', question);
     var t = addBubble('ai', '<i></i><i></i><i></i>', true);
     t.classList.add('typing');

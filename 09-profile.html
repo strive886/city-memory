@@ -39,6 +39,29 @@
 .dfoot{margin-top:10px;text-align:center}
 .dfoot a{font-size:12px;color:var(--seal);text-decoration:none}
 .menus{display:flex;flex-direction:column;gap:9px}
+/* ---------- 成就墙 ---------- */
+.achv-title{font-size:13.5px;font-weight:700;font-family:var(--serif);letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.achv-title .cnt{font-size:11px;color:var(--ink-3);font-family:var(--sans);font-weight:400;letter-spacing:0}
+.achvrow{display:flex;gap:10px}
+.achv{
+  flex:1;border:1.5px solid var(--ink);border-radius:var(--r-md);padding:12px 4px 10px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;
+  background:var(--card);transition:transform .12s;user-select:none;
+}
+.achv:hover{background:#fbf5e8}
+.achv:active{transform:scale(.96)}
+.achv .badge{
+  width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--gold);
+  background:radial-gradient(circle at 35% 30%, #fdf3d8, #e8c46a 72%, #c8a24b);
+  box-shadow:0 4px 10px rgba(200,162,75,.35);
+}
+.achv b{font-size:11.5px;font-family:var(--serif);letter-spacing:1px;color:var(--seal)}
+.achv.locked .badge{
+  border-color:var(--line);background:#efe9dc;
+  filter:grayscale(1);opacity:.55;box-shadow:none;
+}
+.achv.locked b{color:var(--ink-3)}
 </style>
 </head>
 <body>
@@ -70,15 +93,16 @@
     <div class="stat" id="statCity" title="点击查看探索城市"><b id="stCity">0</b><span>探索城市</span></div>
   </div>
 
+  <div class="achv-title">🏅 我的成就<span class="cnt" id="achvCnt">0/3</span></div>
+  <div class="achvrow" id="achvRow"></div>
+
   <div class="menus">
     <div class="menurow" id="mPwd"><span>🔑</span>修改密码<span class="chev">›</span></div>
     <a class="menurow" href="02-location.html"><span>🏙️</span>我的城市<span class="sub" id="myCity" style="margin-left:8px"></span><span class="chev">›</span></a>
     <div class="menurow" id="mClear"><span>🧹</span>清除缓存<span class="sub" style="margin-left:8px">收藏 / 记录 / 图鉴</span><span class="chev">›</span></div>
-    <div class="menurow" id="mAbout"><span>📜</span>关于项目<span class="chev">›</span></div>
   </div>
 
   <button class="btn danger" id="logoutBtn" type="button">退出登录</button>
-  <div class="note">城市记忆盲盒 · 课程作业（AI + 手势识别）<br>数据保存在本机浏览器，正式版将接入云开发</div>
   <div class="tabbar"></div>
 </div>
 <nav class="pager"><a href="08-card.html">‹ 上一页</a><a href="index.html">返回总览</a></nav>
@@ -105,7 +129,60 @@
     document.getElementById('stHistory').textContent = Biz.history().length;
     document.getElementById('stCity').textContent = Object.keys(cities).length;
     document.getElementById('myCity').textContent = CITY_DATA[Biz.city()].name;
+    renderAchv();
   }
+
+  /* ---------- 成就墙 ---------- */
+  function getAchievements(){
+    var collected = Biz.collected();
+    var city = CITY_DATA[Biz.city()];
+    var got = city.items.filter(function(id){ return collected[id]; }).length;
+    var asks = Biz.askCount();
+    return [
+      { key: 'first', icon: '🔮', size: 24, name: '破尘初见',
+        locked: Biz.history().length === 0,
+        cond: '完成第一次手势抓取，唤醒第一件城市记忆。',
+        tip: '试着张开手掌，唤醒你的第一件城市记忆吧。',
+        done: '你的第一件城市记忆已在你手中苏醒。' },
+      { key: 'ask', icon: '📜💬', size: 17, name: '打破砂锅',
+        locked: asks <= 5,
+        cond: '向 AI 记忆讲述人累计提问超过 5 次（已问 ' + asks + ' 次）。',
+        tip: '老张知道的秘密可多了，再和他聊 ' + (6 - asks) + ' 句试试？',
+        done: '打破砂锅问到底，AI 老张认可你的好奇心。' },
+      { key: 'city', icon: '🗺️', size: 24, name: city.name + '通',
+        locked: got < city.items.length,
+        cond: '集齐「' + city.name + '」全部 ' + city.items.length + ' 件文物（当前 ' + got + '/' + city.items.length + '）。',
+        tip: '「' + city.name + '」的记忆碎片还未拼凑完整，还差 ' + (city.items.length - got) + ' 件。',
+        done: '「' + city.name + '」的记忆已被你完整收齐。' }
+    ];
+  }
+  function renderAchv(){
+    var list = getAchievements();
+    var unlocked = list.filter(function(a){ return !a.locked; }).length;
+    document.getElementById('achvCnt').textContent = unlocked + '/3';
+    document.getElementById('achvRow').innerHTML = list.map(function(a, i){
+      return '<div class="achv ' + (a.locked ? 'locked' : '') + '" data-i="' + i + '">' +
+        '<div class="badge"><span style="font-size:' + a.size + 'px;line-height:1">' + a.icon + '</span></div>' +
+        '<b>' + a.name + '</b></div>';
+    }).join('');
+    document.querySelectorAll('#achvRow .achv').forEach(function(el){
+      el.onclick = function(){
+        var a = list[+el.getAttribute('data-i')];
+        if(a.locked){
+          openDialog({ title: '🔒 ' + a.name,
+            html: '<p style="text-align:center;line-height:2.1">' + a.tip + '</p>',
+            okText: '去努力', hideCancel: true });
+        }else{
+          openDialog({ title: '🏅 ' + a.name,
+            html: '<p style="text-align:center;line-height:2;color:var(--seal);font-weight:700;margin-bottom:4px">已点亮 ✓</p>' +
+                  '<p style="text-align:center;line-height:2">' + a.done + '</p>' +
+                  '<p style="font-size:11.5px;color:var(--ink-3);text-align:center;line-height:1.9">' + a.cond + '</p>',
+            okText: '收好', hideCancel: true });
+        }
+      };
+    });
+  }
+
   render();
 
   /* ---------- 统计明细弹窗 ---------- */
@@ -235,25 +312,37 @@
     });
   };
 
-  /* 清除缓存 */
+  /* 清除缓存：分类勾选，想清哪个清哪个 */
   document.getElementById('mClear').onclick = function(){
-    confirmDialog('将清除收藏、浏览记录、图鉴进度与城市选择（不影响账号密码），确定吗？', function(){
-      Biz.clearAppData();
-      toast('缓存已清除');
-      render();
-    }, { okText: '清除', title: '清除缓存' });
-  };
-
-  /* 关于项目 */
-  document.getElementById('mAbout').onclick = function(){
+    var items = [
+      { key: 'collected', label: '收藏与图鉴进度', sub: '已收集物件与隐藏故事解锁' },
+      { key: 'history',   label: '浏览记录',       sub: '抓取浏览过的历史列表' },
+      { key: 'ask',       label: '成就进度',       sub: '向 AI 提问的累计次数' },
+      { key: 'misc',      label: '城市选择',       sub: '恢复默认城市与最近抓取' }
+    ];
+    var html = '<div style="display:flex;flex-direction:column;gap:9px">' + items.map(function(it){
+      return '<label style="display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer">' +
+        '<input type="checkbox" class="clr-cb" data-k="' + it.key + '" style="width:16px;height:16px;accent-color:var(--seal);flex:0 0 auto">' +
+        '<span style="flex:1;min-width:0"><b style="font-size:13px;display:block">' + it.label + '</b>' +
+        '<span style="font-size:11px;color:var(--ink-3)">' + it.sub + '</span></span></label>';
+    }).join('') + '</div>';
     openDialog({
-      title: '关于项目',
-      html:
-        '<p style="font-weight:700;text-align:center;font-family:var(--serif);font-size:15px;margin-bottom:4px">城市记忆盲盒</p>' +
-        '<p style="text-align:center;font-size:11.5px;margin-bottom:10px">以赛促学 · 技术赋能文化创意 · 3人小组课程作业</p>' +
-        '<p style="line-height:2">通过 GPS 定位城市，用手势（握拳 / 捏合 / 拉开）隔空抓取本地老物件盲盒，AI 实时生成城市记忆故事并朗读，支持多轮对话、图鉴收藏与纪念卡分享。首批开通<b>石家庄、正定</b>两城。</p>' +
-        '<p style="font-size:12px;color:var(--ink-2);margin-top:8px;line-height:2">技术：MediaPipe Hands 手势识别 · AI 智能体（DeepSeek API，js/ai-config.js 可配置；未配置时本地知识库兜底）· 浏览器 TTS · Canvas · 本地存储</p>',
-      okText: '知道了', hideCancel: true
+      title: '清除缓存',
+      html: html,
+      okText: '清除所选',
+      onOk: function(mask){
+        var picked = {}, any = false;
+        mask.querySelectorAll('.clr-cb').forEach(function(cb){
+          if(cb.checked){ picked[cb.getAttribute('data-k')] = true; any = true; }
+        });
+        if(!any){ toast('未勾选任何项'); return false; }
+        if(picked.collected){ Store.del('collected'); Store.del('hidden'); }
+        if(picked.history){ Store.del('history'); }
+        if(picked.ask){ Store.del('askCount'); }
+        if(picked.misc){ Store.del('city'); Store.del('lastGrab'); }
+        toast('已清除所选缓存 ✓');
+        render();
+      }
     });
   };
 
