@@ -73,6 +73,10 @@
 
   <a class="btn seal" href="04-grab.html" id="grabBtn">抓取城市记忆盲盒</a>
 
+  <div id="relayLine" style="display:none;font-size:12px;color:var(--ink-2);text-align:center;margin-top:-8px">
+    🤝 经由「<b id="relayName" style="color:var(--seal)"></b>」的链接来到这里 · 去抓一件回应 TA
+  </div>
+
   <div class="tiles">
     <a class="tile" href="06-collection.html"><span class="ticon">📖</span>图鉴</a>
     <a class="tile" href="07-history.html"><span class="ticon">🕓</span>浏览记录</a>
@@ -144,6 +148,14 @@
     document.getElementById('stageHint').textContent = gotAll
       ? '「' + city.name + '」的记忆已集齐，隐藏故事在图鉴等你'
       : '光球里藏着一枚老物件 · 点击或做「握拳」手势抓取';
+
+    /* 好友接力来源 */
+    var relay = Store.get('relay', null);
+    var relayLine = document.getElementById('relayLine');
+    if(relay && relay.from){
+      document.getElementById('relayName').textContent = relay.from;
+      relayLine.style.display = 'block';
+    }else relayLine.style.display = 'none';
 
     /* 最近收集（全局，按收集时间倒序取2） */
     var all = Object.keys(collected).sort(function(a, b){ return collected[b] - collected[a]; });

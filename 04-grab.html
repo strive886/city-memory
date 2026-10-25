@@ -15,6 +15,16 @@
 .cam video{z-index:3}
 .cam #overlay{z-index:4}
 #dust{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;display:block}
+.camloading{
+  position:absolute;inset:0;z-index:9;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;
+  background:rgba(20,16,10,.65);backdrop-filter:blur(2px);
+}
+.camloading .ring{
+  width:44px;height:44px;border-radius:50%;
+  border:3px solid rgba(216,207,191,.25);border-top-color:var(--gold);
+  animation:spinSlow 1s linear infinite;
+}
 .cam.cam-on video,.cam.cam-on canvas{display:block}
 .cam .tag{position:absolute;font-size:10.5px;color:#d8cfbf;border:1px solid rgba(216,207,191,.4);
   border-radius:999px;padding:2px 9px;background:rgba(20,16,10,.55);z-index:5}
@@ -114,6 +124,11 @@
     <canvas id="dust"></canvas>
     <video id="video" playsinline muted></video>
     <canvas id="overlay"></canvas>
+
+    <div class="camloading" id="camLoading">
+      <div class="ring"></div>
+      <div style="font-size:12px;color:#d8cfbf;text-align:center;line-height:1.9">正在加载手势识别组件…<br>首次约 5-15 秒（需联网）</div>
+    </div>
 
     <div class="orb" id="orb" title="点击盲盒光球">🎁</div>
     <div class="reveal" id="reveal">
@@ -464,6 +479,10 @@
   var canvas = document.getElementById('overlay');
   var ctx = canvas.getContext('2d');
   var hands = null, running = false, camOn = false;
+  var mpLoading = false, loadTimer = null;
+
+  function showCamLoading(){ document.getElementById('camLoading').style.display = 'flex'; }
+  function hideCamLoading(){ document.getElementById('camLoading').style.display = 'none'; }
 
   var CONNECTIONS = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],
     [11,12],[9,13],[13,14],[14,15],[13,17],[17,18],[18,19],[19,20],[0,17]];
@@ -488,6 +507,10 @@
   }
 
   function onResults(res){
+    if(mpLoading){   // 模型首次出结果 = 加载完成
+      mpLoading = false; clearTimeout(loadTimer); hideCamLoading();
+      document.getElementById('camBtn').textContent = '⏹ 关闭摄像头';
+    }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     var lms = res.multiHandLandmarks || [];
     /* 画骨架 */
@@ -564,6 +587,7 @@
   document.getElementById('camBtn').onclick = async function(){
     var btn = this;
     if(camOn){ running = false; camOn = false;
+      mpLoading = false; clearTimeout(loadTimer); hideCamLoading();
       if(video.srcObject) video.srcObject.getTracks().forEach(function(t){ t.stop(); });
       cam.classList.remove('cam-on');
       document.getElementById('mpTag').textContent = '● 未开启';
@@ -579,7 +603,9 @@
       });
       video.srcObject = stream;
       await video.play();
+      showCamLoading();
       if(typeof Hands === 'undefined'){
+        hideCamLoading(); mpLoading = false;
         btn.textContent = '📷 开启手势识别';
         toast('手势识别组件加载失败（需联网），请使用演示按钮');
         return;
@@ -594,13 +620,25 @@
       camOn = true; running = true;
       canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
       cam.classList.add('cam-on');
-      document.getElementById('mpTag').textContent = '● 识别中';
-      btn.textContent = '⏹ 关闭摄像头';
-      setHud('手势识别已开启：先张开手掌，再握拳抓取', 'ok');
+      document.getElementById('mpTag').textContent = '● 加载模型';
+      btn.textContent = '⏳ 加载识别模型…';
+      setHud('组件已就绪，正在加载识别模型…', 'ok');
       document.getElementById('hudDot').className = 'dot ok';
       dustStop();   // 摄像头识别时暂停背景粒子，把算力留给手势识别
+      mpLoading = true;
+      loadTimer = setTimeout(function(){   // 25 秒仍无结果视为超时
+        if(!mpLoading) return;
+        mpLoading = false; hideCamLoading(); running = false; camOn = false;
+        if(video.srcObject) video.srcObject.getTracks().forEach(function(t){ t.stop(); });
+        cam.classList.remove('cam-on');
+        document.getElementById('mpTag').textContent = '● 未开启';
+        btn.textContent = '📷 开启手势识别';
+        setHud('模型加载超时，请检查网络后重试（或用演示按钮）', 'off');
+        toast('识别模型加载超时');
+      }, 25000);
       loop();
     }catch(e){
+      hideCamLoading(); mpLoading = false; clearTimeout(loadTimer);
       btn.textContent = '📷 开启手势识别';
       toast('摄像头开启失败：' + (e.message || e.name) + '，可用演示按钮');
     }
