@@ -206,6 +206,35 @@ function setUserAvatar(dataUrl){
 }
 window.setUserAvatar = setUserAvatar;
 
+/* ---------- 线性 SVG 图标库（与底部导航同一描边风格，替代 emoji 小图标） ---------- */
+var Ico = {
+  pin:    '<path d="M12 21s-6.5-5.4-6.5-10.2a6.5 6.5 0 0 1 13 0C18.5 15.6 12 21 12 21z"/><circle cx="12" cy="10.6" r="2.4"/>',
+  book:   '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M20 18H6.5A2.5 2.5 0 0 0 4 20.5"/>',
+  clock:  '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2.5"/>',
+  card:   '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M3.5 10h17M7.5 14h6"/>',
+  user:   '<circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c1.2-3.4 3.6-5 6.5-5s5.3 1.6 6.5 5"/>',
+  trash:  '<path d="M4.5 6.5h15"/><path d="M9.5 6.5V5A1.5 1.5 0 0 1 11 3.5h2A1.5 1.5 0 0 1 14.5 5v1.5"/><path d="M6.5 6.5l1 13.5h9l1-13.5"/>',
+  key:    '<circle cx="8" cy="15" r="3.5"/><path d="M10.6 12.4L19 4M15.5 7.5l2.5 2.5M13 10l2 2"/>',
+  city:   '<path d="M4 20.5h16"/><path d="M6 20.5V9.5l5-3v14"/><path d="M11 20.5V4l7 3.2v13.3"/>',
+  camera: '<path d="M4 8.5a2 2 0 0 1 2-2h2l1.2-2h5.6L16 6.5h2a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.4"/>',
+  edit:   '<path d="M4 20l1-4L16.5 4.5a2.12 2.12 0 0 1 3 3L8 19z"/>',
+  lock:   '<rect x="5.5" y="10.5" width="13" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>',
+  report: '<path d="M4 10.5v3.5l3 .5 8 4.5V5.5l-8 4.5z"/><path d="M17.5 9.5a4.5 4.5 0 0 1 0 5.5"/>',
+  link:   '<path d="M9.5 14.5l5-5"/><path d="M13.2 6.3l1.3-1.3a3.5 3.5 0 0 1 5 5L18.2 11.3"/><path d="M10.8 17.7l-1.3 1.3a3.5 3.5 0 0 1-5-5l1.3-1.3"/>',
+  gift:   '<path d="M6 10.5h12V20H6z"/><path d="M4.5 7.5h15v3h-15z"/><path d="M12 7.5V20"/><path d="M12 7.5c-2.2 0-4.2-1-4.2-2.4C7.8 3.8 9 3.2 10 3.8c1.1.6 2 2.2 2 3.7.0-1.5.9-3.1 2-3.7 1-.6 2.2 0 2.2 1.3 0 1.4-2 2.4-4.2 2.4z"/>',
+  spark:  '<path d="M12 4l1.8 4.6L18 10l-4.2 1.4L12 16l-1.8-4.6L6 10l4.2-1.4z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+  star:   '<path d="M12 3.5l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/>',
+  stop:   '<rect x="7" y="7" width="10" height="10" rx="1.5"/>',
+  box:    '<path d="M4 8l8-4.5L20 8v8l-8 4.5L4 16z"/><path d="M4 8l8 4.5L20 8M12 12.5V20.5"/>',
+  phone:  '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M10.5 17.5h3"/>',
+  chat:   '<path d="M21 12a8 8 0 0 1-11.6 7.1L4.5 20l1.2-4.1A8 8 0 1 1 21 12z"/>',
+  check:  '<path d="M4.5 12.5l5 5L19.5 6.5"/>'
+};
+window.ico = function(name, size, color){
+  size = size || 16;
+  return '<svg class="ico" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="' + (color || 'currentColor') + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + Ico[name] + '</svg>';
+};
+
 /* ---------- 音效（WebAudio 合成，无音频文件；grab/burst/clean/collect/achieve） ---------- */
 var Sfx = (function(){
   var ctx = null;

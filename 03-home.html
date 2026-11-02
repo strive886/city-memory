@@ -74,14 +74,14 @@
   <a class="btn seal" href="04-grab.html" id="grabBtn">抓取城市记忆盲盒</a>
 
   <div id="relayLine" style="display:none;font-size:12px;color:var(--ink-2);text-align:center;margin-top:-8px">
-    🤝 经由「<b id="relayName" style="color:var(--seal)"></b>」的链接来到这里 · 去抓一件回应 TA
+    <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 14.5l5-5"/><path d="M13.2 6.3l1.3-1.3a3.5 3.5 0 0 1 5 5L18.2 11.3"/><path d="M10.8 17.7l-1.3 1.3a3.5 3.5 0 0 1-5-5l1.3-1.3"/></svg> 经由「<b id="relayName" style="color:var(--seal)"></b>」的链接来到这里 · 去抓一件回应 TA
   </div>
 
   <div class="tiles">
-    <a class="tile" href="06-collection.html"><span class="ticon">📖</span>图鉴</a>
-    <a class="tile" href="07-history.html"><span class="ticon">🕓</span>浏览记录</a>
-    <a class="tile" id="cardTile"><span class="ticon">💌</span>纪念卡</a>
-    <a class="tile" href="09-profile.html"><span class="ticon">🙂</span>个人中心</a>
+    <a class="tile" href="06-collection.html"><span class="ticon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M20 18H6.5A2.5 2.5 0 0 0 4 20.5"/></svg></span>图鉴</a>
+    <a class="tile" href="07-history.html"><span class="ticon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2.5"/></svg></span>浏览记录</a>
+    <a class="tile" id="cardTile"><span class="ticon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M3.5 10h17M7.5 14h6"/></svg></span>纪念卡</a>
+    <a class="tile" href="09-profile.html"><span class="ticon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c1.2-3.4 3.6-5 6.5-5s5.3 1.6 6.5 5"/></svg></span>个人中心</a>
   </div>
 
   <div style="display:flex;align-items:center;margin-top:0">
@@ -93,9 +93,10 @@
 
   <div class="tabbar"></div>
 </div>
-<nav class="pager"><a href="02-location.html">‹ 上一页</a><a href="index.html">总览</a><a href="04-grab.html">下一页：手势抓取页 ›</a></nav>
+<nav class="pager"><a href="index.html">总览</a><a href="04-grab.html">下一页：手势抓取页 ›</a></nav>
 
 <script src="js/data.js"></script>
+<script src="js/art.js"></script>
 <script src="js/app.js"></script>
 <script>
 (function(){
@@ -120,16 +121,16 @@
         '<span style="font-size:11px;color:var(--ink-2)">' + got + '/' + ids.length + '</span></div>' +
       '</div>';
 
-    /* 城市切换 */
+    /* 城市切换 + 定位入口（右上角 📍） */
     var chip = document.getElementById('cityChip');
-    chip.textContent = city.name + ' ▾';
+    chip.innerHTML = locating ? ico('pin', 14) + ' 定位中…' : ico('pin', 14) + ' ' + city.name + ' ▾';
     chip.onclick = function(){ document.getElementById('cityMenu').classList.toggle('show'); };
     var menu = document.getElementById('cityMenu');
     menu.innerHTML = '<div class="hd">切换城市</div>' + Object.keys(CITY_DATA).map(function(id){
       var c = CITY_DATA[id];
       return '<div class="' + (id === cityId ? 'on' : '') + '" data-id="' + id + '">' +
         c.name + ' · ' + c.tagline + (id === cityId ? ' ✓' : '') + '</div>';
-    }).join('');
+    }).join('') + '<div id="relocRow">📍 重新定位当前城市</div>';
     menu.querySelectorAll('div[data-id]').forEach(function(d){
       d.onclick = function(){
         cityId = d.dataset.id;
@@ -139,12 +140,17 @@
         render();
       };
     });
+    var rr = menu.querySelector('#relocRow');
+    rr.onclick = function(){
+      document.getElementById('cityMenu').classList.remove('show');
+      autoLocate(true);
+    };
 
     document.getElementById('cityRibbon').textContent = '城市记忆 · ' + city.name;
     var gotAll = got >= ids.length;
     document.getElementById('grabBtn').textContent = gotAll
       ? '盲盒已集齐 · 再抽一次碰碰运气' : '抓取城市记忆盲盒';
-    document.getElementById('orb').textContent = gotAll ? '✨' : '🎁';
+    document.getElementById('orb').innerHTML = ico(gotAll ? 'spark' : 'gift', 36, gotAll ? '#7a4a12' : '#fff8ef');
     document.getElementById('stageHint').textContent = gotAll
       ? '「' + city.name + '」的记忆已集齐，隐藏故事在图鉴等你'
       : '光球里藏着一枚老物件 · 点击或做「握拳」手势抓取';
@@ -161,17 +167,58 @@
     var all = Object.keys(collected).sort(function(a, b){ return collected[b] - collected[a]; });
     var recentEl = document.getElementById('recent');
     if(!all.length){
-      recentEl.innerHTML = '<div class="empty" style="flex:1"><div class="big">🫙</div>还没有收集到老物件<br>去首页上方抓一个盲盒吧！</div>';
+      recentEl.innerHTML = '<div class="empty" style="flex:1"><div class="big"><svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8l8-4.5L20 8v8l-8 4.5L4 16z"/><path d="M4 8l8 4.5L20 8M12 12.5V20.5"/></svg></div>还没有收集到老物件<br>去首页上方抓一个盲盒吧！</div>';
     }else{
       recentEl.innerHTML = all.slice(0, 2).map(function(id){
         var it = ITEM_DATA[id], ct = CITY_DATA[it.city];
         return '<a class="rcard" href="05-chat.html?item=' + id + '">' +
-          '<div class="thumb" style="background:hsl(' + it.hue + ',42%,90%)">' + it.emoji + '</div>' +
+          '<div class="thumb" style="' + (itemArt(id, 34) ?
+            'background:radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%);border-color:#4a4030' :
+            'background:hsl(' + it.hue + ',42%,90%)') + '">' + (itemArt(id, 34) || it.emoji) + '</div>' +
           '<b>' + it.name + '</b><span>' + ct.name + ' · ' + fmtDate(collected[id]) + '</span></a>';
       }).join('');
     }
     var cardHref = all.length ? '08-card.html?item=' + all[0] : '08-card.html';
-    document.getElementById('cardTile').href = cardHref + (cardHref.indexOf('?') >= 0 ? '&' : '?') + 'from=home';
+  document.getElementById('cardTile').href = cardHref + (cardHref.indexOf('?') >= 0 ? '&' : '?') + 'from=home';
+  }
+
+  /* ---------- 定位（首页内完成） ---------- */
+  var locating = false;
+  function distKm(lat1, lng1, lat2, lng2){
+    var r = Math.PI / 180;
+    var a = Math.sin((lat2 - lat1) * r / 2), b = Math.sin((lng2 - lng1) * r / 2);
+    var h = a * a + Math.cos(lat1 * r) * Math.cos(lat2 * r) * b * b;
+    return 2 * 6371 * Math.asin(Math.sqrt(h));
+  }
+  function autoLocate(manual){
+    if(locating) return;
+    var chip = document.getElementById('cityChip');
+    if(!navigator.geolocation){
+      toast('浏览器不支持定位，请在右上角手动选择城市'); return;
+    }
+    locating = true;
+    chip.textContent = '📍 定位中…';
+    toast(manual ? '正在重新定位…' : '正在定位你所在的城市…', 1600);
+    navigator.geolocation.getCurrentPosition(function(pos){
+      locating = false;
+      var la = pos.coords.latitude, ln = pos.coords.longitude;
+      var best = null, bd = 1e9;
+      Object.keys(CITY_DATA).forEach(function(id){
+        var d = distKm(la, ln, CITY_DATA[id].lat, CITY_DATA[id].lng);
+        if(d < bd){ bd = d; best = id; }
+      });
+      if(bd <= 150){
+        cityId = best; Biz.setCity(best);
+        toast('已定位到「' + CITY_DATA[best].name + '」✓');
+      }else{
+        toast('距已开通城市较远，请在右上角手动选择', 2800);
+      }
+      render();
+    }, function(){
+      locating = false;
+      render();
+      toast('定位失败，点右上角「📍」手动选择城市', 2800);
+    }, { enableHighAccuracy: true, timeout: 9000 });
   }
 
   document.getElementById('orb').onclick = function(){ location.href = '04-grab.html'; };
@@ -190,6 +237,9 @@
   }
 
   render();
+
+  /* 登录后首次进入首页：自动定位所在城市 */
+  if(!Store.get('city', null)) autoLocate();
 })();
 </script>
 </body>

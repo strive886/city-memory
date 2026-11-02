@@ -96,7 +96,7 @@
   </div>
 
   <div class="footbtns">
-    <button class="btn ghost" id="collectBtn" type="button">☆ 收藏到图鉴</button>
+    <button class="btn ghost" id="collectBtn" type="button"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/></svg> 收藏到图鉴</button>
     <a class="btn seal" id="cardBtn" href="08-card.html">生成纪念卡 →</a>
   </div>
 </div>
@@ -104,6 +104,7 @@
 
 <script src="js/ai-config.js"></script>
 <script src="js/data.js"></script>
+<script src="js/art.js"></script>
 <script src="js/app.js"></script>
 <script>
 (function(){
@@ -119,8 +120,10 @@
   var city = CITY_DATA[item.city];
 
   document.title = item.name + ' · AI 记忆讲述人';
-  document.getElementById('objThumb').textContent = item.emoji;
-  document.getElementById('objThumb').style.background = 'hsl(' + item.hue + ',42%,90%)';
+  var artHtml = itemArt(itemId, 52);
+  document.getElementById('objThumb').innerHTML = artHtml || item.emoji;
+  document.getElementById('objThumb').style.background = artHtml ? 'radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%)' : 'hsl(' + item.hue + ',42%,90%)';
+  document.getElementById('objThumb').style.borderColor = artHtml ? '#4a4030' : '';
   document.getElementById('objName').textContent = item.name;
   document.getElementById('objMeta').textContent = item.en + ' · ' + item.era;
   document.getElementById('objCity').textContent = city.name;

@@ -42,6 +42,7 @@
 <nav class="pager"><a href="06-collection.html">‹ 上一页</a><a href="index.html">总览</a><a href="08-card.html">下一页：纪念卡页 ›</a></nav>
 
 <script src="js/data.js"></script>
+<script src="js/art.js"></script>
 <script src="js/app.js"></script>
 <script>
 (function(){
@@ -52,7 +53,7 @@
     var list = Biz.history().slice().sort(function(a, b){ return b.ts - a.ts; });
     var box = document.getElementById('list');
     if(!list.length){
-      box.innerHTML = '<div class="empty" style="margin-top:20px"><div class="big">🕰️</div>还没有浏览记录<br>抓一个盲盒，认识一件老物件吧</div>' +
+      box.innerHTML = '<div class="empty" style="margin-top:20px"><div class="big"><svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2.5"/></svg></div>还没有浏览记录<br>抓一个盲盒，认识一件老物件吧</div>' +
         '<a class="btn seal" href="04-grab.html" style="margin-top:14px">去抓取盲盒</a>';
       return;
     }
@@ -63,8 +64,9 @@
       var day = dayLabel(r.ts);
       if(day !== lastDay){ html += '<div class="date">' + day + '</div>'; lastDay = day; }
       var city = CITY_DATA[it.city];
+      var ah = itemArt(it.id, 38);
       html += '<a class="rec" href="05-chat.html?item=' + it.id + '">' +
-        '<div class="thumb" style="background:hsl(' + it.hue + ',42%,90%)">' + it.emoji + '</div>' +
+        '<div class="thumb" style="' + (ah ? 'background:radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%);border-color:#4a4030' : 'background:hsl(' + it.hue + ',42%,90%)') + '">' + (ah || it.emoji) + '</div>' +
         '<div class="meta"><b>' + it.name + '</b><span>' + city.name + ' · ' + fmtTime(r.ts) + '</span></div>' +
         (Biz.isCollected(it.id) ? '<span class="chip seal" style="font-size:10px;padding:2px 8px">已收藏</span>' : '') +
         '<span class="chev">›</span></a>';

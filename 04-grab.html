@@ -156,7 +156,7 @@
   </div>
 
   <div class="demorow">
-    <button class="btn ghost" id="camBtn" type="button">📷 开启手势识别</button>
+    <button class="btn ghost" id="camBtn" type="button"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5a2 2 0 0 1 2-2h2l1.2-2h5.6L16 6.5h2a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.4"/></svg> 开启手势识别</button>
     <button class="btn ghost" id="demoGrab" type="button">演示：抓取</button>
     <button class="btn ghost" id="demoClean" type="button">演示：清理</button>
     <button class="btn ghost" id="demoPull" type="button">演示：拉开</button>
@@ -167,6 +167,7 @@
 <nav class="pager"><a href="03-home.html">‹ 上一页</a><a href="index.html">总览</a><a href="05-chat.html">下一页：AI 对话页 ›</a></nav>
 
 <script src="js/data.js"></script>
+<script src="js/art.js"></script>
 <script src="js/app.js"></script>
 <script>
 (function(){
@@ -236,8 +237,10 @@
     orb.classList.add('gone');
     var it = ITEM_DATA[targetId];
     var el3d = document.getElementById('item3d');
-    el3d.textContent = it.emoji;
-    el3d.style.background = 'hsl(' + it.hue + ',38%,86%)';
+    var artHtml = itemArt(targetId, 112);
+    el3d.innerHTML = artHtml || it.emoji;
+    el3d.style.background = artHtml ? 'radial-gradient(75% 70% at 50% 42%, #35301f, #1c1812 78%)' : 'hsl(' + it.hue + ',38%,86%)';
+    el3d.style.borderColor = artHtml ? '#8a744a' : '';
     document.getElementById('rvName').textContent = it.name;
     document.getElementById('rvEra').textContent = it.en + ' · ' + it.era;
     reveal.classList.add('show');
@@ -512,7 +515,7 @@
   function onResults(res){
     if(mpLoading){   // 模型首次出结果 = 加载完成
       mpLoading = false; clearTimeout(loadTimer); hideCamLoading();
-      document.getElementById('camBtn').textContent = '⏹ 关闭摄像头';
+      document.getElementById('camBtn').innerHTML = ico('stop', 14) + ' 关闭摄像头';
     }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     var lms = res.multiHandLandmarks || [];
@@ -594,12 +597,12 @@
       if(video.srcObject) video.srcObject.getTracks().forEach(function(t){ t.stop(); });
       cam.classList.remove('cam-on');
       document.getElementById('mpTag').textContent = '● 未开启';
-      btn.textContent = '📷 开启手势识别'; setHud('摄像头已关闭，可用演示按钮继续', 'off');
+      btn.innerHTML = ico('camera', 14) + ' 开启手势识别'; setHud('摄像头已关闭，可用演示按钮继续', 'off');
       document.getElementById('hudDot').className = 'dot off';
       dustStart();
       return;
     }
-    btn.textContent = '⏳ 启动中…';
+    btn.innerHTML = ico('clock', 14) + ' 启动中…';
     try{
       var stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false
@@ -609,7 +612,7 @@
       showCamLoading();
       if(typeof Hands === 'undefined'){
         hideCamLoading(); mpLoading = false;
-        btn.textContent = '📷 开启手势识别';
+        btn.innerHTML = ico('camera', 14) + ' 开启手势识别';
         toast('手势识别组件加载失败（需联网），请使用演示按钮');
         return;
       }
@@ -624,7 +627,7 @@
       canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
       cam.classList.add('cam-on');
       document.getElementById('mpTag').textContent = '● 加载模型';
-      btn.textContent = '⏳ 加载识别模型…';
+      btn.innerHTML = ico('clock', 14) + ' 加载识别模型…';
       setHud('组件已就绪，正在加载识别模型…', 'ok');
       document.getElementById('hudDot').className = 'dot ok';
       dustStop();   // 摄像头识别时暂停背景粒子，把算力留给手势识别
@@ -635,14 +638,14 @@
         if(video.srcObject) video.srcObject.getTracks().forEach(function(t){ t.stop(); });
         cam.classList.remove('cam-on');
         document.getElementById('mpTag').textContent = '● 未开启';
-        btn.textContent = '📷 开启手势识别';
+        btn.innerHTML = ico('camera', 14) + ' 开启手势识别';
         setHud('模型加载超时，请检查网络后重试（或用演示按钮）', 'off');
         toast('识别模型加载超时');
       }, 25000);
       loop();
     }catch(e){
       hideCamLoading(); mpLoading = false; clearTimeout(loadTimer);
-      btn.textContent = '📷 开启手势识别';
+      btn.innerHTML = ico('camera', 14) + ' 开启手势识别';
       toast('摄像头开启失败：' + (e.message || e.name) + '，可用演示按钮');
     }
   };

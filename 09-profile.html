@@ -77,14 +77,14 @@
   <div class="profile">
     <div class="avwrap" id="avwrap" title="点击更换头像">
       <div id="avatarBox"></div>
-      <span class="cam">📷</span>
+      <span class="cam"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5a2 2 0 0 1 2-2h2l1.2-2h5.6L16 6.5h2a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.4"/></svg></span>
       <input type="file" id="avatarInput" accept="image/*" style="display:none">
     </div>
     <div style="flex:1;min-width:0">
       <div style="font-size:17px;font-weight:700;font-family:var(--serif)" id="nickText">—</div>
       <div style="font-size:12px;color:var(--ink-3);margin-top:3px" id="phoneText">—</div>
     </div>
-    <span class="chip ghost click" id="editNick">✏️ 编辑资料</span>
+    <span class="chip ghost click" id="editNick"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1-4L16.5 4.5a2.12 2.12 0 0 1 3 3L8 19z"/></svg> 编辑资料</span>
   </div>
 
   <div class="stats">
@@ -97,9 +97,9 @@
   <div class="achvrow" id="achvRow"></div>
 
   <div class="menus">
-    <div class="menurow" id="mPwd"><span>🔑</span>修改密码<span class="chev">›</span></div>
-    <a class="menurow" href="02-location.html"><span>🏙️</span>我的城市<span class="sub" id="myCity" style="margin-left:8px"></span><span class="chev">›</span></a>
-    <div class="menurow" id="mClear"><span>🧹</span>清除缓存<span class="sub" style="margin-left:8px">收藏 / 记录 / 图鉴</span><span class="chev">›</span></div>
+    <div class="menurow" id="mPwd"><span><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="3.5"/><path d="M10.6 12.4L19 4M15.5 7.5l2.5 2.5M13 10l2 2"/></svg></span>修改密码<span class="chev">›</span></div>
+    <a class="menurow" href="03-home.html"><span><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20.5h16"/><path d="M6 20.5V9.5l5-3v14"/><path d="M11 20.5V4l7 3.2v13.3"/></svg></span>我的城市<span class="sub" id="myCity" style="margin-left:8px"></span><span class="chev">›</span></a>
+    <div class="menurow" id="mClear"><span><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 6.5h15"/><path d="M9.5 6.5V5A1.5 1.5 0 0 1 11 3.5h2A1.5 1.5 0 0 1 14.5 5v1.5"/><path d="M6.5 6.5l1 13.5h9l1-13.5"/></svg></span>清除缓存<span class="sub" style="margin-left:8px">收藏 / 记录 / 图鉴</span><span class="chev">›</span></div>
   </div>
 
   <button class="btn danger" id="logoutBtn" type="button">退出登录</button>
@@ -108,6 +108,7 @@
 <nav class="pager"><a href="08-card.html">‹ 上一页</a><a href="index.html">返回总览</a></nav>
 
 <script src="js/data.js"></script>
+<script src="js/art.js"></script>
 <script src="js/app.js"></script>
 <script>
 (function(){
@@ -207,7 +208,7 @@
     openDialog({ title: '收藏明细 · ' + ids.length + ' 件', hideCancel: true, okText: '收好',
       html: '<div class="dlist">' + ids.map(function(id){
         var it = ITEM_DATA[id];
-        return row('05-chat.html?item=' + id, it.emoji, 'hsl(' + it.hue + ',42%,90%)',
+        return row('05-chat.html?item=' + id, itemArt(id, 32) || it.emoji, itemArt(id, 32) ? 'radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%)' : 'hsl(' + it.hue + ',42%,90%)',
           it.name, CITY_DATA[it.city].name + ' · ' + it.era + ' · ' + fmtDate(c[id]) + ' 收藏');
       }).join('') + '</div>' + dfoot('06-collection.html', '进入图鉴') });
   };
@@ -223,7 +224,7 @@
       html: '<div class="dlist">' + h.slice(0, 12).map(function(r){
         var it = ITEM_DATA[r.item];
         if(!it) return '';
-        return row('05-chat.html?item=' + it.id, it.emoji, 'hsl(' + it.hue + ',42%,90%)',
+        return row('05-chat.html?item=' + it.id, itemArt(it.id, 32) || it.emoji, itemArt(it.id, 32) ? 'radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%)' : 'hsl(' + it.hue + ',42%,90%)',
           it.name, CITY_DATA[it.city].name + ' · ' + dayLabel(r.ts) + ' ' + fmtTime(r.ts) +
           (Biz.isCollected(it.id) ? ' · 已收藏' : ''));
       }).join('') + '</div>' + dfoot('07-history.html', '进入浏览记录页') });
@@ -243,10 +244,10 @@
           ? '已探索 · 收集 ' + got + '/' + city.items.length + ' 件' +
             (Biz.checkHidden(cid) ? ' · 🗝️ 隐藏故事已解锁' : ' · 🔒 集齐解锁隐藏故事')
           : '未探索 · 还没有收到这座城市的物件';
-        return row('06-collection.html?city=' + cid, '🏙️', 'hsl(' + (cid === 'zhengding' ? 26 : 210) + ',42%,90%)',
+        return row('06-collection.html?city=' + cid, svg('city',18), 'hsl(' + (cid === 'zhengding' ? 26 : 210) + ',42%,90%)',
           city.name + ' · ' + city.tagline, meta);
       }).join('') + '</div>' +
-      (any ? dfoot('02-location.html', '切换/重新定位城市') : '') });
+      (any ? dfoot('03-home.html', '回首页重新定位/切城') : '') });
   };
 
   /* ---------- 更换头像 ---------- */

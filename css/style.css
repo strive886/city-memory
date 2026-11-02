@@ -169,3 +169,18 @@ a{color:inherit}
 @keyframes spinSlow{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
 @media (max-width:430px){ body{padding:18px 8px 48px} .phone{border-radius:24px} }
+
+/* ---------- 线性图标 ---------- */
+.ico{display:inline-block;vertical-align:-0.18em;flex:0 0 auto}
+
+/* ---------- 老物件悬空展台（方案A） ---------- */
+.pedestal{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.pedestal .glow{position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(60% 55% at 50% 44%, rgba(232,182,79,.30), rgba(20,16,10,0) 72%)}
+.pedestal .art{position:relative;width:100%;height:100%;animation:artFloat 3.4s ease-in-out infinite}
+.pedestal .shadow{position:absolute;bottom:2%;left:50%;width:58%;height:11%;
+  transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.5), rgba(0,0,0,0) 70%);
+  animation:artShadow 3.4s ease-in-out infinite}
+@keyframes artFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6%)}}
+@keyframes artShadow{0%,100%{transform:translateX(-50%) scaleX(1);opacity:.75}50%{transform:translateX(-50%) scaleX(.8);opacity:.5}}

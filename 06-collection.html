@@ -52,7 +52,7 @@
     <div class="track"><div class="fill" id="progFill" style="width:0%"></div></div>
   </div>
 
-  <button class="btn" id="reportBtn" type="button">📣 生成收集战报（可保存分享）</button>
+  <button class="btn" id="reportBtn" type="button"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5v3.5l3 .5 8 4.5V5.5l-8 4.5z"/><path d="M17.5 9.5a4.5 4.5 0 0 1 0 5.5"/></svg> 生成收集战报（可保存分享）</button>
 
   <div class="citytabs" id="cityTabs"></div>
   <div class="grid4" id="grid"></div>
@@ -66,6 +66,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="js/data.js"></script>
+<script src="js/art.js"></script>
 <script src="js/app.js"></script>
 <script>
 (function(){
@@ -102,7 +103,9 @@
       var it = ITEM_DATA[id];
       if(collected[id]){
         return '<a class="slot" href="05-chat.html?item=' + id + '">' +
-          '<div class="thumb" style="background:hsl(' + it.hue + ',42%,90%)">' + it.emoji + '</div>' +
+          '<div class="thumb" style="' + (itemArt(id, 40) ?
+            'background:radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%);border-color:#4a4030' :
+            'background:hsl(' + it.hue + ',42%,90%)') + '">' + (itemArt(id, 40) || it.emoji) + '</div>' +
           '<div class="nm">' + it.name + '</div><span class="tag">' + it.era + '</span></a>';
       }
       return '<div class="slot locked" data-locked="1"><div class="thumb">?</div>' +
@@ -114,7 +117,7 @@
       el.onclick = function(){
         var got = city.items.filter(function(id){ return collected[id]; }).length;
         openDialog({
-          title: '🔒 还差 ' + (city.items.length - got) + ' 件',
+          title: ico('lock', 15) + ' 还差 ' + (city.items.length - got) + ' 件',
           html: '<p style="text-align:center;line-height:2">「' + city.name + '」的记忆碎片还未拼凑完整<br>回首页抓一个盲盒试试运气</p>',
           okText: '去抓取',
           onOk: function(){ setTimeout(function(){ location.href = '04-grab.html'; }, 50); }
@@ -126,14 +129,14 @@
     var hb = document.getElementById('hiddenBox');
     var unlockedAt = Biz.checkHidden(cur);
     if(unlockedAt){
-      hb.innerHTML = '<span class="hicon">🗝️</span>' +
+      hb.innerHTML = '<span class="hicon">' + ico('key', 22) + '</span>' +
         '<div style="flex:1"><b style="color:var(--seal)">' + city.hidden.title + '</b>' +
         '<div class="sub">已解锁 · 点击阅读' + city.name + '的隐藏记忆</div></div>' +
         '<button class="btn sm seal" id="readHidden" type="button">阅读</button>';
       document.getElementById('readHidden').onclick = showHidden;
     }else{
       var got = city.items.filter(function(id){ return collected[id]; }).length;
-      hb.innerHTML = '<span class="hicon">🔒</span>' +
+      hb.innerHTML = '<span class="hicon">' + ico('lock', 22) + '</span>' +
         '<div style="flex:1"><b>集齐 ' + city.items.length + ' 件 · 解锁隐藏故事</b>' +
         '<div class="sub">「' + city.name + '」还差 ' + (city.items.length - got) + ' 件，回首页继续抓取吧</div></div>' +
         '<a class="btn sm ghost" href="04-grab.html">去抓取</a>';
@@ -154,6 +157,12 @@
   /* ---------- 收集战报图 ---------- */
   var siteUrl = 'https://strive886.github.io/city-memory/';
   var rptCv = null;
+  var rptArtImgs = {};
+  Object.keys(window.ITEM_ART || {}).forEach(function(aid){
+    var img = new Image();
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(ITEM_ART[aid]);
+    rptArtImgs[aid] = img;
+  });
   function buildReport(){
     var cv = rptCv || (rptCv = document.createElement('canvas'));
     cv.width = 640; cv.height = 780;
@@ -215,12 +224,21 @@
       items.forEach(function(iid, idx){
         var x = 84 + idx * 56, has = !!collected[iid];
         var it = ITEM_DATA[iid];
-        c.fillStyle = has ? 'hsl(' + it.hue + ',42%,90%)' : '#f3edde';
-        c.beginPath(); if(c.roundRect) c.roundRect(x, y0 + 84, 44, 44, 10); else c.rect(x, y0 + 84, 44, 44); c.fill();
-        c.strokeStyle = has ? '#c8a24b' : '#d8cfbf'; c.lineWidth = 1.2; c.stroke();
-        c.textAlign = 'center'; c.textBaseline = 'middle';
-        if(has){ c.font = '22px serif'; c.fillStyle = '#2a251d'; c.fillText(it.emoji, x + 22, y0 + 107); }
-        else{ c.font = 'bold 17px sans-serif'; c.fillStyle = '#c9bfa9'; c.fillText('?', x + 22, y0 + 107); }
+        var aim = has ? rptArtImgs[iid] : null;
+        if(aim && aim.complete && aim.naturalWidth > 0){
+          var sg = c.createRadialGradient(x + 22, y0 + 100, 6, x + 22, y0 + 106, 27);
+          sg.addColorStop(0, '#35301f'); sg.addColorStop(1, '#201b12');
+          c.fillStyle = sg; c.beginPath(); if(c.roundRect) c.roundRect(x, y0 + 84, 44, 44, 10); else c.rect(x, y0 + 84, 44, 44); c.fill();
+          c.strokeStyle = '#c8a24b'; c.lineWidth = 1.2; c.stroke();
+          c.drawImage(aim, x + 1, y0 + 85, 42, 42);
+        }else{
+          c.fillStyle = has ? 'hsl(' + it.hue + ',42%,90%)' : '#f3edde';
+          c.beginPath(); if(c.roundRect) c.roundRect(x, y0 + 84, 44, 44, 10); else c.rect(x, y0 + 84, 44, 44); c.fill();
+          c.strokeStyle = has ? '#c8a24b' : '#d8cfbf'; c.lineWidth = 1.2; c.stroke();
+          c.textAlign = 'center'; c.textBaseline = 'middle';
+          if(has){ c.font = '22px serif'; c.fillStyle = '#2a251d'; c.fillText(it.emoji, x + 22, y0 + 107); }
+          else{ c.font = 'bold 17px sans-serif'; c.fillStyle = '#c9bfa9'; c.fillText('?', x + 22, y0 + 107); }
+        }
       });
       y0 += 186;
     });
@@ -253,7 +271,7 @@
   document.getElementById('reportBtn').onclick = function(){
     var cv = buildReport();
     openDialog({
-      title: '📣 收集战报',
+      title: '收集战报',
       html: '<div id="rptHolder" style="border:1.5px solid var(--line);border-radius:12px;overflow:hidden"></div>' +
             '<p style="font-size:11px;color:var(--ink-3);text-align:center;margin-top:2px">保存后可发朋友圈，二维码扫了直达作业</p>',
       okText: '⬇ 保存到相册',

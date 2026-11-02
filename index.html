@@ -42,7 +42,7 @@ h1 small{font-size:14px;color:var(--seal);font-weight:400;margin-left:12px;lette
 <div class="sheet">
   <div class="kicker">COURSE PROJECT · 功能完成版</div>
   <h1>城市记忆盲盒<small>AI + 手势识别网页</small></h1>
-  <p class="desc">用户打开网页 → 登录 → GPS 定位城市 → 用手势（握拳 / 捏合 / 双手拉开）隔空抓取本地「城市记忆盲盒」→ AI 生成 80 字记忆故事并语音朗读 → 多轮对话提问 → 收藏进个人图鉴 → 生成数字纪念卡分享。首批开通<b>石家庄、正定</b>两座城市，全部数据用浏览器本地存储模拟。</p>
+  <p class="desc">用户打开网页 → 登录 → 首页自动定位城市 → 用手势（握拳 / 捏合 / 双手拉开）隔空抓取本地「城市记忆盲盒」→ AI 生成 80 字记忆故事并语音朗读 → 多轮对话提问 → 收藏进个人图鉴 → 生成数字纪念卡分享。首批开通<b>石家庄、正定</b>两座城市，全部数据用浏览器本地存储模拟。</p>
   <div class="meta">
     <span class="chip">课程作业 · 以赛促学</span>
     <span class="chip">3 人小组</span>
@@ -60,8 +60,7 @@ h1 small{font-size:14px;color:var(--seal);font-weight:400;margin-left:12px;lette
     <h2>核心流程</h2>
     <div class="flow">
       <a class="fnode" href="01-login.html">登录</a><span class="arr">→</span>
-      <a class="fnode" href="02-location.html">GPS 定位 / 选城市</a><span class="arr">→</span>
-      <a class="fnode" href="03-home.html">首页</a><span class="arr">→</span>
+      <a class="fnode" href="03-home.html">首页（自动定位）</a><span class="arr">→</span>
       <a class="fnode" href="04-grab.html">手势抓取</a><span class="arr">→</span>
       <a class="fnode" href="05-chat.html">AI 讲故事 / 对话</a><span class="arr">→</span>
       <a class="fnode" href="06-collection.html">图鉴</a><span class="arr">→</span>
@@ -75,7 +74,6 @@ h1 small{font-size:14px;color:var(--seal);font-weight:400;margin-left:12px;lette
     <h2>页面清单（分页面可跳转）</h2>
     <div class="grid">
       <a class="card" href="01-login.html"><span class="num">01 · 登录</span><h3>账号体系</h3><p>手机号注册 / 登录、微信一键登录（模拟）、本地会话保持。</p><span class="file">01-login.html</span></a>
-      <a class="card" href="02-location.html"><span class="num">02 · 定位</span><h3>定位与城市切换</h3><p>浏览器 Geolocation 就近匹配城市，支持手动切换石家庄 / 正定。</p><span class="file">02-location.html</span></a>
       <a class="card" href="03-home.html"><span class="num">03 · 首页</span><h3>盲盒舞台</h3><p>头像昵称、收集进度、城市切换菜单、光球舞台、最近收集。</p><span class="file">03-home.html</span></a>
       <a class="card" href="04-grab.html"><span class="num">04 · 抓取</span><h3>手势交互（核心）</h3><p>摄像头 + MediaPipe Hands：握拳抓取、挥手擦除泥沙「考古清理」文物、双手拉开讲故事；无摄像头可用演示按钮。</p><span class="file">04-grab.html</span></a>
       <a class="card" href="05-chat.html"><span class="num">05 · 对话</span><h3>AI 记忆讲述人</h3><p>80 字故事打字机呈现、浏览器 TTS 朗读、多轮对话问答、收藏入口。</p><span class="file">05-chat.html</span></a>

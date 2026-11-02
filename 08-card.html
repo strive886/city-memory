@@ -50,6 +50,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="js/data.js"></script>
+<script src="js/art.js"></script>
 <script src="js/app.js"></script>
 <script>
 (function(){
@@ -87,6 +88,13 @@
   /* ---------- Canvas 绘制纪念卡 ---------- */
   var cv = document.getElementById('card'), ctx = cv.getContext('2d');
   var W = cv.width, H = cv.height;
+  var artImgs = {};
+  Object.keys(window.ITEM_ART || {}).forEach(function(aid){
+    var img = new Image();
+    img.onload = function(){ if(aid === curId) drawCard(); };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(ITEM_ART[aid]);
+    artImgs[aid] = img;
+  });
 
   function wrapText(text, x, y, maxW, lh, font){
     ctx.font = font; ctx.fillStyle = '#4a4237'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
@@ -170,12 +178,21 @@
     ctx.fillText('NO.' + String(no + 1).padStart(3, '0'), W - 50, 60);
 
     /* 物件主图 */
-    ctx.fillStyle = 'hsl(' + item.hue + ',42%,88%)';
-    ctx.beginPath(); ctx.arc(W / 2, 258, 92, 0, Math.PI * 2); ctx.fill();
+    var im = artImgs[item.id];
+    if(im && im.complete && im.naturalWidth > 0){
+      var stage = ctx.createRadialGradient(W / 2, 246, 18, W / 2, 258, 96);
+      stage.addColorStop(0, '#35301f'); stage.addColorStop(1, '#1c1812');
+      ctx.fillStyle = stage; ctx.beginPath(); ctx.arc(W / 2, 258, 92, 0, Math.PI * 2); ctx.fill();
+      ctx.drawImage(im, W / 2 - 86, 258 - 86, 172, 172);
+    }else{
+      ctx.fillStyle = 'hsl(' + item.hue + ',42%,88%)';
+      ctx.beginPath(); ctx.arc(W / 2, 258, 92, 0, Math.PI * 2); ctx.fill();
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = '92px serif'; ctx.fillText(item.emoji, W / 2, 262);
+    }
     ctx.strokeStyle = '#c8a24b'; ctx.lineWidth = 2; ctx.setLineDash([4, 5]);
     ctx.beginPath(); ctx.arc(W / 2, 258, 104, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = '92px serif'; ctx.fillText(item.emoji, W / 2, 262);
 
     /* 名称与年代 */
     ctx.fillStyle = '#2a251d';
@@ -226,8 +243,9 @@
     el.innerHTML = cards.map(function(c){
       var it = ITEM_DATA[c.item];
       if(!it) return '';
+      var ah = itemArt(c.item, 40);
       return '<div class="cthumb' + (c.item === curId ? ' on' : '') + '" data-id="' + c.item + '">' +
-        '<span class="ce" style="background:hsl(' + it.hue + ',42%,90%)">' + it.emoji + '</span>' +
+        '<span class="ce" style="' + (ah ? 'background:radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%)' : 'background:hsl(' + it.hue + ',42%,90%)') + '">' + (ah || it.emoji) + '</span>' +
         '<span class="cn">' + escapeHtml(it.name) + '</span></div>';
     }).join('');
     el.querySelectorAll('.cthumb').forEach(function(t){
