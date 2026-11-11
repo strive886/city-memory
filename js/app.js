@@ -32,7 +32,7 @@ window.Session = Session;
 /* 页面守卫：未登录跳回登录页（登录页不调用） */
 function requireLogin(){
   var u = Session.current();
-  if(!u){ location.replace('01-login.html'); throw new Error('need-login'); }
+  if(!u){ location.replace('index.html'); throw new Error('need-login'); }
   return u;
 }
 window.requireLogin = requireLogin;

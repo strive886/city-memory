@@ -45,9 +45,6 @@ a{color:inherit}
   min-height:640px;position:relative;
 }
 .phone.dark{background:#221e18;border-color:#0e0c09;color:#efe7d8}
-.pager{margin-top:18px;display:flex;gap:22px;font-size:13px}
-.pager a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px}
-.pager a:hover{color:var(--seal);border-color:var(--seal)}
 
 /* ---------- 顶栏 ---------- */
 .topbar{display:flex;align-items:center;gap:12px}

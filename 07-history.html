@@ -23,6 +23,13 @@
 .headrow{display:flex;align-items:center}
 .headrow .title{flex:1}
 .clear{font-size:11.5px;color:var(--seal);cursor:pointer}
+.daterow{display:flex;justify-content:flex-end;margin:2px 0 8px}
+.datepick{
+  border:1.5px solid var(--ink);border-radius:999px;background:var(--card);
+  font-family:inherit;font-size:12px;color:var(--ink);padding:5px 12px;
+  letter-spacing:.5px;cursor:pointer;text-align:center;
+}
+.datepick:focus{outline:none;border-color:var(--seal)}
 </style>
 </head>
 <body>
@@ -33,13 +40,13 @@
     <div class="headrow" style="flex:1"><div class="title">浏览记录</div></div>
     <span class="clear" id="clearBtn">清空</span>
   </div>
-  <div class="chip ghost" style="align-self:flex-start">按时间倒序 · 保留最近200条</div>
+
+  <div class="daterow"><input type="date" id="datePick" class="datepick" aria-label="选择日期查看当天浏览记录"></div>
 
   <div id="list" style="display:flex;flex-direction:column;gap:10px"></div>
 
   <div class="tabbar"></div>
 </div>
-<nav class="pager"><a href="06-collection.html">‹ 上一页</a><a href="index.html">总览</a><a href="08-card.html">下一页：纪念卡页 ›</a></nav>
 
 <script src="js/data.js"></script>
 <script src="js/art.js"></script>
@@ -49,20 +56,59 @@
   requireLogin();
   renderTabbar('clock');
 
+  /* ---------- 日期：保留最近 30 天，超出一个月的记录载入即删除 ---------- */
+  var DAY = 86400000;
+  function isoDate(d){
+    var p = function(n){ return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+  var now = new Date();
+  var todayIso = isoDate(now);
+  var minIso = isoDate(new Date(now.getTime() - 29 * DAY));
+
+  var all = Biz.history();
+  var kept = all.filter(function(r){ return Date.now() - r.ts <= 30 * DAY; });
+  if(kept.length !== all.length){
+    Store.set('history', kept);
+    toast('已自动清理超过一个月的旧记录');
+  }
+
+  var pick = document.getElementById('datePick');
+  pick.min = minIso;
+  pick.max = todayIso;
+  pick.value = todayIso;
+  var selDate = todayIso;
+
+  pick.addEventListener('change', function(){
+    selDate = pick.value || todayIso;
+    render();
+  });
+
+  function labelOf(iso){
+    if(iso === todayIso) return '今天';
+    if(iso === isoDate(new Date(Date.now() - DAY))) return '昨天';
+    var y = iso.split('-');
+    return parseInt(y[1], 10) + ' 月 ' + parseInt(y[2], 10) + ' 日';
+  }
+
   function render(){
-    var list = Biz.history().slice().sort(function(a, b){ return b.ts - a.ts; });
+    var allRec = Biz.history();
+    var list = allRec.slice().sort(function(a, b){ return b.ts - a.ts; })
+      .filter(function(r){ return isoDate(new Date(r.ts)) === selDate; });
     var box = document.getElementById('list');
-    if(!list.length){
+    if(!allRec.length){
       box.innerHTML = '<div class="empty" style="margin-top:20px"><div class="big"><svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2.5"/></svg></div>还没有浏览记录<br>抓一个盲盒，认识一件老物件吧</div>' +
         '<a class="btn seal" href="04-grab.html" style="margin-top:14px">去抓取盲盒</a>';
       return;
     }
-    var html = '', lastDay = '';
+    if(!list.length){
+      box.innerHTML = '<div class="empty" style="margin-top:20px"><div class="big"><svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></svg></div>' + labelOf(selDate) + '没有浏览记录<br>换一天看看，或去抓一个盲盒吧</div>';
+      return;
+    }
+    var html = '<div class="date">' + labelOf(selDate) + ' · ' + list.length + ' 条</div>';
     list.forEach(function(r){
       var it = ITEM_DATA[r.item];
       if(!it) return;
-      var day = dayLabel(r.ts);
-      if(day !== lastDay){ html += '<div class="date">' + day + '</div>'; lastDay = day; }
       var city = CITY_DATA[it.city];
       var ah = itemArt(it.id, 38);
       html += '<a class="rec" href="05-chat.html?item=' + it.id + '">' +

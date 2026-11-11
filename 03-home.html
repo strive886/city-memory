@@ -23,24 +23,47 @@
   border:1.5px dashed rgba(181,64,44,.55);animation:spinSlow 12s linear infinite}
 .stage .hint{font-size:12px;color:var(--ink-2);letter-spacing:1px}
 .stage .ribbon{position:absolute;top:12px;left:14px;font-family:var(--serif);font-size:12px;color:var(--seal);letter-spacing:3px;opacity:.8}
-.tiles{display:flex;gap:10px}
-.tile{
-  flex:1;border:1.5px solid var(--ink);border-radius:var(--r-md);padding:12px 0 10px;
-  display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;
-  text-decoration:none;color:var(--ink);background:var(--card);cursor:pointer;
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.slot{
+  border:1.5px solid var(--ink);border-radius:var(--r-md);padding:8px 5px 9px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
+  text-decoration:none;color:var(--ink);transition:transform .15s;background:var(--card);
 }
-.tile:hover{background:#fbf5e8}
-.tile .ticon{font-size:21px}
-.rcard{
-  flex:1;border:1.5px solid var(--ink);border-radius:var(--r-md);padding:10px;
-  text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:7px;background:var(--card);
-}
-.rcard .thumb{
-  height:74px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:34px;
+.slot:hover{transform:translateY(-2px)}
+.slot .thumb{
+  width:100%;height:52px;border-radius:8px;display:flex;align-items:center;justify-content:center;
   border:1.5px solid var(--line);
 }
-.rcard b{font-size:12.5px;line-height:1.4}
-.rcard span{font-size:10.5px;color:var(--ink-3)}
+.slot .nm{font-size:10px;line-height:1.35;text-align:center;color:var(--ink-2);height:27px;overflow:hidden}
+.slot .tag{font-size:9px;color:var(--gold);letter-spacing:1px}
+.slot.locked{border-style:dashed;border-color:var(--line);cursor:pointer;background:#fbf8f0}
+.slot.locked:hover{background:#f6efdf}
+.slot.locked .thumb{background:#f3edde;border-style:dashed;color:#c9bfa9;font-size:22px;font-weight:700}
+.closing-hint{
+  text-align:center;font-size:12px;color:var(--ink-2);letter-spacing:1.5px;
+  margin:6px 0 2px;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.closing-hint::before,.closing-hint::after{
+  content:"";width:34px;height:1px;background:var(--line);flex:none;
+}
+.car-card{
+  position:relative;flex:0 0 96px;display:flex;flex-direction:column;gap:5px;
+  text-decoration:none;color:var(--ink);user-select:none;-webkit-user-drag:none;
+}
+.car-card .thumb{
+  height:68px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  border:1.5px solid #4a4030;background:radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%);
+}
+.car-card .nm{font-size:10.5px;line-height:1.3;height:27px;overflow:hidden;color:var(--ink)}
+.car-card .meta{font-size:9px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.car-card .got{
+  position:absolute;top:4px;right:4px;z-index:2;width:16px;height:16px;border-radius:50%;
+  background:var(--seal);color:#fff8ef;font-size:10px;font-style:normal;font-weight:700;
+  display:flex;align-items:center;justify-content:center;border:1.5px solid var(--card);
+}
+.carousel{overflow:hidden;cursor:grab;margin-top:2px;touch-action:pan-y}
+.carousel.dragging{cursor:grabbing}
+.car-track{display:flex;gap:10px;width:max-content;will-change:transform;padding:2px 0}
 .citymenu{
   position:absolute;top:56px;right:20px;z-index:50;display:none;flex-direction:column;gap:6px;
   background:var(--card);border:1.5px solid var(--ink);border-radius:var(--r-md);padding:8px;min-width:150px;
@@ -68,7 +91,7 @@
   <div class="stage">
     <span class="ribbon" id="cityRibbon">城市记忆 · 石家庄</span>
     <div class="orb" id="orb" title="点我抓取">🎁</div>
-    <div class="hint" id="stageHint">光球里藏着一枚老物件 · 点击或做「握拳」手势抓取</div>
+    <div class="hint" id="stageHint">伸出手握个拳 · 拆开城市记忆盲盒</div>
   </div>
 
   <a class="btn seal" href="04-grab.html" id="grabBtn">抓取城市记忆盲盒</a>
@@ -77,23 +100,25 @@
     <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 14.5l5-5"/><path d="M13.2 6.3l1.3-1.3a3.5 3.5 0 0 1 5 5L18.2 11.3"/><path d="M10.8 17.7l-1.3 1.3a3.5 3.5 0 0 1-5-5l1.3-1.3"/></svg> 经由「<b id="relayName" style="color:var(--seal)"></b>」的链接来到这里 · 去抓一件回应 TA
   </div>
 
-  <div class="tiles">
-    <a class="tile" href="06-collection.html"><span class="ticon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M20 18H6.5A2.5 2.5 0 0 0 4 20.5"/></svg></span>图鉴</a>
-    <a class="tile" href="07-history.html"><span class="ticon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2.5"/></svg></span>浏览记录</a>
-    <a class="tile" id="cardTile"><span class="ticon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M3.5 10h17M7.5 14h6"/></svg></span>纪念卡</a>
-    <a class="tile" href="09-profile.html"><span class="ticon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c1.2-3.4 3.6-5 6.5-5s5.3 1.6 6.5 5"/></svg></span>个人中心</a>
+  <div style="display:flex;align-items:center">
+    <span style="font-size:13.5px;font-weight:700;font-family:var(--serif);letter-spacing:1px" id="gridTitle">我的图鉴</span>
+    <div class="spacer"></div>
+    <a href="08-card.html?from=home" style="font-size:12px;color:var(--ink-3);text-decoration:none">纪念卡 ›</a>
+    <a href="06-collection.html" style="font-size:12px;color:var(--ink-3);text-decoration:none;margin-left:10px">图鉴 ›</a>
   </div>
+  <div class="grid4" id="grid"></div>
 
   <div style="display:flex;align-items:center;margin-top:0">
-    <span style="font-size:13.5px;font-weight:700;font-family:var(--serif);letter-spacing:1px">最近收集</span>
+    <span style="font-size:13.5px;font-weight:700;font-family:var(--serif);letter-spacing:1px" id="carTitle">全部图鉴</span>
     <div class="spacer"></div>
-    <a href="06-collection.html" style="font-size:12px;color:var(--ink-3);text-decoration:none">更多 ›</a>
+    <a href="06-collection.html" style="font-size:12px;color:var(--ink-3);text-decoration:none">图鉴 ›</a>
   </div>
-  <div style="display:flex;gap:12px" id="recent"></div>
+  <div class="carousel" id="carousel"><div class="car-track" id="carTrack"></div></div>
+
+  <div class="closing-hint" id="closingHint">光球里藏着一枚老物件 · 快来探索吧</div>
 
   <div class="tabbar"></div>
 </div>
-<nav class="pager"><a href="index.html">总览</a><a href="04-grab.html">下一页：手势抓取页 ›</a></nav>
 
 <script src="js/data.js"></script>
 <script src="js/art.js"></script>
@@ -152,8 +177,8 @@
       ? '盲盒已集齐 · 再抽一次碰碰运气' : '抓取城市记忆盲盒';
     document.getElementById('orb').innerHTML = ico(gotAll ? 'spark' : 'gift', 36, gotAll ? '#7a4a12' : '#fff8ef');
     document.getElementById('stageHint').textContent = gotAll
-      ? '「' + city.name + '」的记忆已集齐，隐藏故事在图鉴等你'
-      : '光球里藏着一枚老物件 · 点击或做「握拳」手势抓取';
+      ? '记忆已集齐 · 再拆一次碰碰运气'
+      : '伸出手握个拳 · 拆开城市记忆盲盒';
 
     /* 好友接力来源 */
     var relay = Store.get('relay', null);
@@ -163,23 +188,42 @@
       relayLine.style.display = 'block';
     }else relayLine.style.display = 'none';
 
-    /* 最近收集（全局，按收集时间倒序取2） */
-    var all = Object.keys(collected).sort(function(a, b){ return collected[b] - collected[a]; });
-    var recentEl = document.getElementById('recent');
-    if(!all.length){
-      recentEl.innerHTML = '<div class="empty" style="flex:1"><div class="big"><svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8l8-4.5L20 8v8l-8 4.5L4 16z"/><path d="M4 8l8 4.5L20 8M12 12.5V20.5"/></svg></div>还没有收集到老物件<br>去首页上方抓一个盲盒吧！</div>';
-    }else{
-      recentEl.innerHTML = all.slice(0, 2).map(function(id){
-        var it = ITEM_DATA[id], ct = CITY_DATA[it.city];
-        return '<a class="rcard" href="05-chat.html?item=' + id + '">' +
-          '<div class="thumb" style="' + (itemArt(id, 34) ?
+    /* 我的图鉴格（当前城市 8 件，收藏点亮） */
+    document.getElementById('gridTitle').textContent = '我的图鉴 · ' + city.name + ' ' + got + '/' + ids.length;
+    document.getElementById('grid').innerHTML = ids.map(function(id){
+      var it = ITEM_DATA[id];
+      if(collected[id]){
+        var ah = itemArt(id, 40);
+        return '<a class="slot" href="05-chat.html?item=' + id + '">' +
+          '<div class="thumb" style="' + (ah ?
             'background:radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%);border-color:#4a4030' :
-            'background:hsl(' + it.hue + ',42%,90%)') + '">' + (itemArt(id, 34) || it.emoji) + '</div>' +
-          '<b>' + it.name + '</b><span>' + ct.name + ' · ' + fmtDate(collected[id]) + '</span></a>';
-      }).join('');
-    }
-    var cardHref = all.length ? '08-card.html?item=' + all[0] : '08-card.html';
-  document.getElementById('cardTile').href = cardHref + (cardHref.indexOf('?') >= 0 ? '&' : '?') + 'from=home';
+            'background:hsl(' + it.hue + ',42%,90%)') + '">' + (ah || it.emoji) + '</div>' +
+          '<div class="nm">' + it.name + '</div><span class="tag">' + it.era + '</span></a>';
+      }
+      return '<div class="slot locked"><div class="thumb">?</div>' +
+        '<div class="nm" style="color:#c9bfa9">？？？？</div><span class="tag">未解锁</span></div>';
+    }).join('');
+    document.querySelectorAll('#grid .slot.locked').forEach(function(el){
+      el.onclick = function(){
+        openDialog({
+          title: ico('lock', 15) + ' 还差 ' + (ids.length - got) + ' 件',
+          html: '<p style="text-align:center;line-height:2">「' + city.name + '」的记忆碎片还未拼凑完整<br>抓一个盲盒试试运气</p>',
+          okText: '去抓取',
+          onOk: function(){ setTimeout(function(){ location.href = '04-grab.html'; }, 50); }
+        });
+      };
+    });
+
+    /* 底部邀约语（随收集进度变化） */
+    var total = 0, gotTotal = 0;
+    Object.keys(CITY_DATA).forEach(function(cid){
+      total += CITY_DATA[cid].items.length;
+      gotTotal += CITY_DATA[cid].items.filter(function(id){ return collected[id]; }).length;
+    });
+    document.getElementById('closingHint').textContent = gotTotal >= total
+      ? '✦ 两城的记忆都被你收齐了 · 太厉害了'
+      : (gotTotal === 0 ? '光球里藏着一枚老物件 · 快来探索吧'
+                        : '光球里还藏着 ' + (total - gotTotal) + ' 枚老物件 · 快来探索吧');
   }
 
   /* ---------- 定位（首页内完成） ---------- */
@@ -237,6 +281,90 @@
   }
 
   render();
+
+  /* ---------- 全部图鉴轮播：两城混排 + 自动播放 + 鼠标拖拽 ---------- */
+  (function(){
+    var items = [];
+    Object.keys(CITY_DATA).forEach(function(cid){
+      CITY_DATA[cid].items.forEach(function(iid){ items.push(iid); });
+    });
+    /* 洗牌混排（不按城市分组，每次进页随机） */
+    for(var i = items.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = items[i]; items[i] = items[j]; items[j] = t;
+    }
+    document.getElementById('carTitle').textContent = '全部图鉴 · ' + items.length + ' 件';
+
+    var got = Biz.collected();
+    var box = document.getElementById('carousel'), track = document.getElementById('carTrack');
+    track.innerHTML = items.concat(items).map(function(id){
+      var it = ITEM_DATA[id], ct = CITY_DATA[it.city];
+      return '<a class="car-card" href="05-chat.html?item=' + id + '" draggable="false">' +
+        (got[id] ? '<i class="got">✓</i>' : '') +
+        '<div class="thumb">' + (itemArt(id, 42) || it.emoji) + '</div>' +
+        '<div class="nm">' + it.name + '</div>' +
+        '<span class="meta">' + ct.name + ' · ' + it.era + '</span></a>';
+    }).join('');
+
+    var half = 0, offset = 0, dragging = false, hover = false, lastX = 0, moved = 0, lastT = 0;
+    function measure(){
+      var n = items.length;
+      if(track.children.length >= 2 * n && track.children[n]){
+        half = track.children[n].offsetLeft - track.children[0].offsetLeft;
+      }
+    }
+    measure();
+    window.addEventListener('resize', measure);
+    function wrap(){
+      if(half > 0){
+        while(offset >= half) offset -= half;
+        while(offset < 0) offset += half;
+      }
+    }
+    function paint(){ track.style.transform = 'translateX(' + (-offset) + 'px)'; }
+
+    box.addEventListener('mouseenter', function(){ hover = true; });
+    box.addEventListener('mouseleave', function(){ hover = false; });
+    box.addEventListener('pointerdown', function(e){
+      dragging = true; moved = 0; lastX = e.clientX;
+      box.classList.add('dragging');
+      if(box.setPointerCapture) box.setPointerCapture(e.pointerId);
+    });
+    box.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      var dx = e.clientX - lastX;
+      lastX = e.clientX;
+      moved += Math.abs(dx);
+      offset -= dx;
+      wrap();
+      paint();
+    });
+    function endDrag(){
+      if(!dragging) return;
+      dragging = false;
+      box.classList.remove('dragging');
+    }
+    box.addEventListener('pointerup', endDrag);
+    box.addEventListener('pointercancel', endDrag);
+    /* 拖拽超过 8px 视为滑动，不触发卡片跳转 */
+    box.addEventListener('click', function(e){
+      if(moved > 8){ e.preventDefault(); e.stopPropagation(); }
+    }, true);
+
+    /* 双驱动：rAF 为主，定时器兜底（页面被遮挡 rAF 停摆时仍能续播） */
+    function loop(){
+      var now = performance.now();
+      var dt = lastT ? Math.min(1000, now - lastT) / 1000 : 0;
+      lastT = now;
+      if(!dragging && !hover && dt > 0){
+        offset += 26 * dt;
+        wrap();
+        paint();
+      }
+    }
+    requestAnimationFrame(loop);
+    setInterval(loop, 250);
+  })();
 
   /* 登录后首次进入首页：自动定位所在城市 */
   if(!Store.get('city', null)) autoLocate();

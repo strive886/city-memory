@@ -3,125 +3,163 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>城市记忆盲盒 · 网页作业 · 功能完成版</title>
+<title>登录 · 城市记忆盲盒</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-body{padding-top:52px}
-.sheet{width:920px;max-width:100%}
-.kicker{font-size:12px;letter-spacing:5px;color:var(--ink-3)}
-h1{font-family:var(--serif);font-size:30px;margin-top:10px;letter-spacing:3px}
-h1 small{font-size:14px;color:var(--seal);font-weight:400;margin-left:12px;letter-spacing:2px}
-.desc{margin-top:12px;font-size:13.5px;color:var(--ink-2);line-height:2;max-width:760px}
-.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.sect{margin-top:34px}
-.sect h2{font-family:var(--serif);font-size:18px;letter-spacing:2px;display:flex;align-items:center;gap:10px}
-.sect h2::after{content:"";flex:1;height:1px;background:var(--line)}
-.flow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;border:1.5px solid var(--ink);border-radius:16px;background:var(--card);padding:16px 18px;margin-top:16px}
-.fnode{border:1.5px solid var(--ink);border-radius:10px;padding:8px 14px;font-size:13px;text-decoration:none;color:var(--ink);background:var(--card)}
-.fnode:hover{border-color:var(--seal);color:var(--seal)}
-.arr{color:var(--ink-3)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:16px}
-.card{border:1.5px solid var(--ink);border-radius:14px;background:var(--card);padding:16px 15px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:7px;transition:transform .15s}
-.card:hover{transform:translateY(-2px);border-color:var(--seal)}
-.card .num{font-size:11px;letter-spacing:3px;color:var(--seal)}
-.card h3{font-size:15.5px;font-family:var(--serif);letter-spacing:1px}
-.card p{font-size:12px;color:var(--ink-2);line-height:1.75}
-.card .file{font-size:10.5px;color:var(--ink-3);font-family:Consolas,monospace;margin-top:2px}
-.mods{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-.mod{border:1.5px solid var(--line);border-radius:14px;background:var(--card);padding:14px 16px}
-.mod b{font-size:14px;font-family:var(--serif)}
-.mod ul{margin:8px 0 0 18px;font-size:12.5px;color:var(--ink-2);line-height:2}
-.tech{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.startrow{display:flex;gap:12px;margin-top:30px;align-items:center}
-.startrow .btn{width:230px}
-.foot{margin-top:30px;font-size:12px;color:var(--ink-3);text-align:center;line-height:2}
-@media(max-width:760px){.grid{grid-template-columns:1fr 1fr}.mods{grid-template-columns:1fr}}
+.emblem{display:flex;justify-content:center;margin-top:8px;filter:drop-shadow(0 10px 18px rgba(42,37,29,.28))}
+.emblem svg{display:block}
+.tabs{display:flex;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
+.tabs button{flex:1;border:none;background:transparent;padding:10px 0;font-size:14px;
+  font-family:inherit;color:var(--ink-2);cursor:pointer;letter-spacing:2px}
+.tabs button.on{background:var(--ink);color:var(--card);font-weight:600}
+.err-tip{font-size:12px;color:var(--seal);min-height:16px;text-align:center}
 </style>
 </head>
 <body>
-<div class="sheet">
-  <div class="kicker">COURSE PROJECT · 功能完成版</div>
-  <h1>城市记忆盲盒<small>AI + 手势识别网页</small></h1>
-  <p class="desc">用户打开网页 → 登录 → 首页自动定位城市 → 用手势（握拳 / 捏合 / 双手拉开）隔空抓取本地「城市记忆盲盒」→ AI 生成 80 字记忆故事并语音朗读 → 多轮对话提问 → 收藏进个人图鉴 → 生成数字纪念卡分享。首批开通<b>石家庄、正定</b>两座城市，全部数据用浏览器本地存储模拟。</p>
-  <div class="meta">
-    <span class="chip">课程作业 · 以赛促学</span>
-    <span class="chip">3 人小组</span>
-    <span class="chip gold">MediaPipe 手势识别</span>
-    <span class="chip gold">AI 讲述人 + TTS</span>
-    <span class="chip gold">2 城市 · 8 件老物件</span>
+<div class="page-tag"><b>01</b>&nbsp;登录页 · LOGIN</div>
+<div class="phone">
+  <div class="emblem">
+    <svg viewBox="0 0 132 132" width="128" height="128" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="城市记忆盲盒">
+      <defs>
+        <linearGradient id="lg_ink" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#38312a"/>
+          <stop offset="1" stop-color="#191510"/>
+        </linearGradient>
+        <radialGradient id="lg_glow" cx=".5" cy=".55" r=".55">
+          <stop offset="0" stop-color="#e8b64f" stop-opacity=".4"/>
+          <stop offset="1" stop-color="#e8b64f" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <!-- 印章式外框 -->
+      <rect x="5" y="5" width="122" height="122" rx="26" fill="url(#lg_ink)" stroke="#c8a24b" stroke-width="2"/>
+      <rect x="12.5" y="12.5" width="107" height="107" rx="20" fill="none" stroke="#c8a24b" stroke-width="1" opacity=".5"/>
+      <!-- 城市升起的光晕 -->
+      <ellipse cx="66" cy="58" rx="42" ry="32" fill="url(#lg_glow)"/>
+      <!-- 从盒中升起的城市天际线 -->
+      <g fill="#e8b64f">
+        <rect x="46" y="46" width="9" height="26" rx="1.5"/>
+        <rect x="58" y="34" width="11" height="38" rx="1.5"/>
+        <rect x="72" y="42" width="9" height="30" rx="1.5"/>
+        <rect x="84" y="50" width="8" height="22" rx="1.5"/>
+      </g>
+      <g fill="#14110b">
+        <rect x="48.5" y="50" width="2.6" height="2.6"/>
+        <rect x="60.5" y="40" width="2.6" height="2.6"/>
+        <rect x="64" y="50" width="2.6" height="2.6"/>
+        <rect x="60.5" y="58" width="2.6" height="2.6"/>
+        <rect x="74.5" y="48" width="2.6" height="2.6"/>
+        <rect x="86" y="56" width="2.6" height="2.6"/>
+      </g>
+      <path d="M63.5 34 V27 M61.5 28.5 h4" stroke="#e8b64f" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M101 32 l1.1 2.7 2.7 1.1 -2.7 1.1 -1.1 2.7 -1.1 -2.7 -2.7 -1.1 2.7 -1.1 z" fill="#c8a24b"/>
+      <circle cx="30" cy="44" r="1.8" fill="#c8a24b" opacity=".8"/>
+      <!-- 盒身（开口向上） -->
+      <rect x="42" y="78" width="48" height="28" rx="5" fill="#12100b" stroke="#e8b64f" stroke-width="2.4"/>
+      <path d="M42 89 h48 M66 78 v28" stroke="#e8b64f" stroke-width="2"/>
+      <!-- 盒口金光缝 -->
+      <rect x="45" y="74.5" width="42" height="3.6" rx="1.8" fill="#e8b64f" opacity=".95"/>
+      <!-- 掀起的盒盖 -->
+      <g transform="rotate(-13 45 79)">
+        <rect x="40" y="66" width="48" height="11" rx="3" fill="#12100b" stroke="#e8b64f" stroke-width="2.4"/>
+      </g>
+      <!-- 朱砂蝴蝶结 -->
+      <path d="M66 93 c -5 -3.4 -10 -4.2 -10 -1.4 0 2.4 5 3.4 10 1.4 z" fill="#b5402c"/>
+      <path d="M66 93 c 5 -3.4 10 -4.2 10 -1.4 0 2.4 -5 3.4 -10 1.4 z" fill="#b5402c"/>
+      <circle cx="66" cy="93" r="1.8" fill="#e8b64f"/>
+      <!-- 地平点线 -->
+      <path d="M26 115 H106" stroke="#c8a24b" stroke-width="1.6" opacity=".55" stroke-dasharray="1 6" stroke-linecap="round"/>
+    </svg>
   </div>
 
-  <div class="startrow">
-    <a class="btn seal" id="startBtn" href="01-login.html">▶ 开始体验（从登录进入）</a>
-    <span class="note" style="text-align:left">推荐 Chrome / Edge 打开；<br>手势页支持摄像头识别，也可用演示按钮。</span>
+  <div class="tabs">
+    <button id="tabLogin" class="on" type="button">登 录</button>
+    <button id="tabReg" type="button">注 册</button>
   </div>
 
-  <div class="sect">
-    <h2>核心流程</h2>
-    <div class="flow">
-      <a class="fnode" href="01-login.html">登录</a><span class="arr">→</span>
-      <a class="fnode" href="03-home.html">首页（自动定位）</a><span class="arr">→</span>
-      <a class="fnode" href="04-grab.html">手势抓取</a><span class="arr">→</span>
-      <a class="fnode" href="05-chat.html">AI 讲故事 / 对话</a><span class="arr">→</span>
-      <a class="fnode" href="06-collection.html">图鉴</a><span class="arr">→</span>
-      <a class="fnode" href="07-history.html">浏览记录</a><span class="arr">→</span>
-      <a class="fnode" href="08-card.html">纪念卡分享</a><span class="arr">→</span>
-      <a class="fnode" href="09-profile.html">个人中心</a>
-    </div>
-  </div>
+  <div class="field"><span><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M10.5 17.5h3"/></svg></span><input id="phone" maxlength="11" placeholder="手机号（11位数字）"></div>
+  <div class="field" id="nickRow" style="display:none"><span><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c1.2-3.4 3.6-5 6.5-5s5.3 1.6 6.5 5"/></svg></span><input id="nick" maxlength="12" placeholder="昵称（可不填，默认用手机尾号）"></div>
+  <div class="field"><span><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></span><input id="pwd" type="password" placeholder="密码（至少6位）"></div>
+  <div class="field" id="pwd2Row" style="display:none"><span><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></span><input id="pwd2" type="password" placeholder="确认密码"></div>
+  <div class="err-tip" id="err"></div>
 
-  <div class="sect">
-    <h2>页面清单（分页面可跳转）</h2>
-    <div class="grid">
-      <a class="card" href="01-login.html"><span class="num">01 · 登录</span><h3>账号体系</h3><p>手机号注册 / 登录、微信一键登录（模拟）、本地会话保持。</p><span class="file">01-login.html</span></a>
-      <a class="card" href="03-home.html"><span class="num">03 · 首页</span><h3>盲盒舞台</h3><p>头像昵称、收集进度、城市切换菜单、光球舞台、最近收集。</p><span class="file">03-home.html</span></a>
-      <a class="card" href="04-grab.html"><span class="num">04 · 抓取</span><h3>手势交互（核心）</h3><p>摄像头 + MediaPipe Hands：握拳抓取、挥手擦除泥沙「考古清理」文物、双手拉开讲故事；无摄像头可用演示按钮。</p><span class="file">04-grab.html</span></a>
-      <a class="card" href="05-chat.html"><span class="num">05 · 对话</span><h3>AI 记忆讲述人</h3><p>80 字故事打字机呈现、浏览器 TTS 朗读、多轮对话问答、收藏入口。</p><span class="file">05-chat.html</span></a>
-      <a class="card" href="06-collection.html"><span class="num">06 · 图鉴</span><h3>收藏与图鉴</h3><p>已收集 / 未解锁格子、两城切换、集齐四件解锁隐藏故事。</p><span class="file">06-collection.html</span></a>
-      <a class="card" href="07-history.html"><span class="num">07 · 记录</span><h3>浏览记录</h3><p>抓取过的物件按时间倒序、按日分组，支持清空。</p><span class="file">07-history.html</span></a>
-      <a class="card" href="08-card.html"><span class="num">08 · 纪念卡</span><h3>分享与社交</h3><p>Canvas 绘制纪念卡、保存 PNG、模拟分享朋友圈、复制好友接力链接。</p><span class="file">08-card.html</span></a>
-      <a class="card" href="09-profile.html"><span class="num">09 · 我的</span><h3>个人中心</h3><p>资料与统计、修改密码、清除缓存、退出登录、项目介绍。</p><span class="file">09-profile.html</span></a>
-    </div>
-  </div>
+  <button class="btn solid" id="submitBtn" type="button">登&nbsp;&nbsp;录</button>
 
-  <div class="sect">
-    <h2>功能模块对照（方案书 → 实现）</h2>
-    <div class="mods">
-      <div class="mod"><b>模块1 · 账号体系</b><ul><li>登录 / 注册（本地模拟）✓</li><li>微信一键登录（模拟）✓</li><li>修改密码、昵称编辑 ✓</li></ul></div>
-      <div class="mod"><b>模块2 · 定位与城市</b><ul><li>浏览器 GPS 定位 + 就近匹配 ✓</li><li>手动切换城市（下拉）✓</li></ul></div>
-      <div class="mod"><b>模块3 · 手势交互</b><ul><li>握拳抓取 → 光球炸开 ✓</li><li>挥手清理 · 考古式擦去泥沙 ✓</li><li>双手拉开触发 AI 故事 ✓</li></ul></div>
-      <div class="mod"><b>模块4 · AI 与对话</b><ul><li>80 字城市记忆故事 ✓</li><li>TTS 语音朗读 ✓</li><li>多轮对话 + 知识库 ✓</li></ul></div>
-      <div class="mod"><b>模块5 · 收藏图鉴</b><ul><li>收藏进图鉴 / 未收集灰格 ✓</li><li>浏览记录（时间倒序）✓</li><li>集齐解锁隐藏故事 ✓</li></ul></div>
-      <div class="mod"><b>模块6 · 分享社交</b><ul><li>Canvas 纪念卡 + 保存图片 ✓</li><li>分享朋友圈（模拟 / Web Share）✓</li><li>好友接力抓取链接 ✓</li></ul></div>
-    </div>
-  </div>
+  <div class="divider">其他登录方式</div>
+  <button class="btn" id="wxBtn" type="button"><svg width="19" height="17" viewBox="0 0 28 24" aria-hidden="true"><path fill="#09BB07" d="M11 3C6 3 2 6.4 2 10.6c0 2.4 1.3 4.5 3.4 5.9L4.6 19.6l3.4-1.7c.9.3 1.9.4 3 .4h.4A6.7 6.7 0 0 1 11 15c0-3.5 3.4-6.3 7.5-6.3h.5C18.2 5 14.9 3 11 3z"/><path fill="#09BB07" d="M26 15.2c0-3.1-3-5.6-6.7-5.6s-6.7 2.5-6.7 5.6 3 5.6 6.7 5.6c.9 0 1.7-.1 2.5-.4l2.9 1.5-.8-2.9c1.3-1 2.1-2.4 2.1-3.8z"/><circle cx="8.6" cy="9" r="1" fill="#fff"/><circle cx="13" cy="9" r="1" fill="#fff"/><circle cx="17.6" cy="14.6" r=".9" fill="#fff"/><circle cx="21" cy="14.6" r=".9" fill="#fff"/></svg>&nbsp;&nbsp;微信一键登录（模拟）</button>
 
-  <div class="sect">
-    <h2>技术栈</h2>
-    <div class="tech">
-      <span class="chip ghost">HTML5 / CSS3 / JavaScript（原生）</span>
-      <span class="chip ghost">MediaPipe Hands（CDN，21 关键点）</span>
-      <span class="chip ghost">getUserMedia 摄像头采集</span>
-      <span class="chip ghost">AI：DeepSeek API（js/ai-config.js 配置）+ 本地知识库兜底</span>
-      <span class="chip ghost">SpeechSynthesis TTS</span>
-      <span class="chip ghost">Canvas 纪念卡导出 PNG</span>
-      <span class="chip ghost">Geolocation 定位</span>
-      <span class="chip ghost">localStorage 本地存储</span>
-    </div>
-  </div>
-
-  <div class="foot">城市记忆盲盒 · 功能完成版 —— 双击 index.html 即可开始；详细玩法见 <a href="说明.md" style="color:var(--seal)">说明.md</a></div>
 </div>
 
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
 <script>
 (function(){
-  /* 已登录则「开始体验」直达首页 */
-  try{
-    if(localStorage.getItem('cmb_session')){
-      document.getElementById('startBtn').href = '03-home.html';
-      document.getElementById('startBtn').textContent = '▶ 继续体验（已登录）';
+  var mode = 'login';
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* 已登录则直接进首页 */
+  if(Session.current()){
+    toast('已登录，正在进入首页…', 1200);
+    setTimeout(function(){ location.href = '03-home.html'; }, 700);
+    return;
+  }
+
+  function setMode(m){
+    mode = m;
+    $('tabLogin').className = m === 'login' ? 'on' : '';
+    $('tabReg').className = m === 'reg' ? 'on' : '';
+    $('nickRow').style.display = m === 'reg' ? '' : 'none';
+    $('pwd2Row').style.display = m === 'reg' ? '' : 'none';
+    $('submitBtn').textContent = m === 'login' ? '登  录' : '注 册 并 登 录';
+    $('err').textContent = '';
+  }
+  $('tabLogin').onclick = function(){ setMode('login'); };
+  $('tabReg').onclick = function(){ setMode('reg'); };
+
+  function err(msg){
+    $('err').textContent = msg;
+    document.querySelectorAll('.field input').forEach(function(inp){
+      inp.parentElement.classList.remove('err');
+    });
+  }
+  function randHue(){ return Math.floor(Math.random() * 360); }
+
+  function doWxLogin(){
+    var u = Session.current();
+    if(!u){
+      var id = 'wx_' + Math.random().toString(36).slice(2, 8);
+      u = { id: id, phone: id, nick: '微信用户' + id.slice(3).toUpperCase(), hue: randHue(), isWx: true };
+      Session.login(u);
     }
-  }catch(e){}
+    toast('微信登录成功（模拟）');
+    setTimeout(function(){ location.href = '03-home.html'; }, 500);
+  }
+  $('wxBtn').onclick = doWxLogin;
+
+  $('submitBtn').onclick = function(){
+    var phone = $('phone').value.trim();
+    var pwd = $('pwd').value;
+    if(!/^1\d{10}$/.test(phone)) return err('请输入 11 位手机号');
+    if(pwd.length < 6) return err('密码至少 6 位');
+
+    var users = Store.get('users', {});
+    if(mode === 'reg'){
+      if(users[phone]) return err('该手机号已注册，请直接登录');
+      if($('pwd2').value !== pwd) return err('两次输入的密码不一致');
+      var nick = $('nick').value.trim() || ('街坊' + phone.slice(-4));
+      users[phone] = { pwd: pwd, nick: nick, hue: randHue(), createdAt: Date.now() };
+      Store.set('users', users);
+      Session.login({ id: phone, phone: phone, nick: nick, hue: users[phone].hue, isWx: false });
+      toast('注册成功，欢迎来到城市记忆盲盒');
+      setTimeout(function(){ location.href = '03-home.html'; }, 600);
+    }else{
+      var u = users[phone];
+      if(!u || u.pwd !== pwd) return err('账号或密码不正确（未注册？请先注册）');
+      Session.login({ id: phone, phone: phone, nick: u.nick, hue: u.hue, avatar: u.avatar || null, isWx: false });
+      toast('登录成功，欢迎回来，' + u.nick);
+      setTimeout(function(){ location.href = '03-home.html'; }, 600);
+    }
+  };
+  $('pwd').addEventListener('keydown', function(e){ if(e.key === 'Enter') $('submitBtn').click(); });
 })();
 </script>
 </body>

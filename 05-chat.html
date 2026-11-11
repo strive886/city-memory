@@ -55,8 +55,6 @@
   <div class="topbar">
     <a class="back" href="03-home.html">←</a>
     <div class="title">AI 记忆讲述人</div>
-    <div class="spacer"></div>
-    <span class="chip ghost">TTS 语音</span>
   </div>
 
   <div class="objhead">
@@ -69,12 +67,11 @@
   </div>
 
   <div class="storybox">
-    <div class="hd"><span class="who">AI 生成 · 约80字</span><div class="spacer"></div><span class="kb" id="kbChip">知识库支撑 · 有据可查</span></div>
     <div class="storytext" id="storyText"></div>
     <div class="storyfoot">
       <button class="playbtn" id="ttsBtn" type="button" title="播放语音">▶</button>
       <div class="wave" id="wave"><i></i><i></i><i></i><i></i><i></i></div>
-      <span style="font-size:12px;color:var(--ink-2)" id="ttsLabel">播放语音（浏览器 TTS）</span>
+      <span style="font-size:12px;color:var(--ink-2)" id="ttsLabel">播放语音</span>
       <div class="spacer"></div>
       <span style="font-size:10.5px;color:var(--ink-3)" id="ttsState"></span>
     </div>
@@ -100,7 +97,6 @@
     <a class="btn seal" id="cardBtn" href="08-card.html">生成纪念卡 →</a>
   </div>
 </div>
-<nav class="pager"><a href="04-grab.html">‹ 上一页</a><a href="index.html">总览</a><a href="06-collection.html">下一页：图鉴页 ›</a></nav>
 
 <script src="js/ai-config.js"></script>
 <script src="js/data.js"></script>
@@ -143,14 +139,6 @@
       }
     }, 34);
   }
-  /* 知识库状态角标：已接 DeepSeek → 在线生成；未配置/失败 → 本地知识库 */
-  function refreshAiChip(){
-    var kb = document.getElementById('kbChip');
-    if(!kb) return;
-    if(AI.enabled()){ kb.textContent = 'DeepSeek 在线生成 · 知识库支撑'; }
-    else{ kb.textContent = '知识库支撑 · 有据可查'; }
-  }
-  refreshAiChip();
   AI.story(itemId).then(function(text){
     typeText(storyEl, text, function(){
       addBubble('ai', '我是这座城市的老朋友。关于这件「' + item.name + '」，你想问点什么？');
@@ -183,7 +171,7 @@
   }
   function stopWave(){
     wave.classList.remove('on'); ttsBtn.textContent = '▶'; ttsBtn.classList.remove('playing');
-    ttsLabel.textContent = '播放语音（浏览器 TTS）';
+    ttsLabel.textContent = '播放语音';
   }
   ttsBtn.onclick = function(){
     if(!('speechSynthesis' in window)){ toast('当前浏览器不支持语音合成'); return; }
@@ -253,7 +241,7 @@
       Sfx.play('achieve');
       var h = CITY_DATA[item.city].hidden;
       openDialog({
-        title: '🎉 集齐' + CITY_DATA[item.city].name + '四件！',
+        title: '🎉 集齐' + CITY_DATA[item.city].name + CITY_DATA[item.city].items.length + ' 件！',
         html: '<p style="text-align:center;color:var(--gold);font-weight:700;margin-bottom:6px">' + h.title + '</p>' +
               '<p style="font-family:var(--serif);line-height:2.1">' + h.text + '</p>',
         okText: '去图鉴看看', hideCancel: false,
