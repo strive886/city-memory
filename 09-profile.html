@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>个人中心 · 城市记忆盲盒</title>
+<title>个人中心 · 拾城记</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
 .profile{border:1.5px solid var(--ink);border-radius:var(--r-lg);padding:18px 16px;display:flex;align-items:center;gap:14px}
@@ -93,7 +93,7 @@
     <div class="stat" id="statCity" title="点击查看探索城市"><b id="stCity">0</b><span>探索城市</span></div>
   </div>
 
-  <div class="achv-title">🏅 我的成就<span class="cnt" id="achvCnt">0/3</span></div>
+  <div class="achv-title"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.8" r="4.6"/><path d="M12 6.6l.75 1.5 1.65.25-1.2 1.2.3 1.65L12 10.4l-1.5.8.3-1.65-1.2-1.2 1.65-.25z"/><path d="M9.4 12.8 7.2 19.6l4.8-2.8 4.8 2.8-2.2-6.8"/></svg> 我的成就<span class="cnt" id="achvCnt">0/3</span></div>
   <div class="achvrow" id="achvRow"></div>
 
   <div class="menus">
@@ -141,9 +141,9 @@
     return [
       { key: 'first', icon: '🔮', size: 24, name: '破尘初见',
         locked: Biz.history().length === 0,
-        cond: '完成第一次手势抓取，唤醒第一件城市记忆。',
-        tip: '试着张开手掌，唤醒你的第一件城市记忆吧。',
-        done: '你的第一件城市记忆已在你手中苏醒。' },
+        cond: '完成第一次手势抓取，唤醒第一段拾城记。',
+        tip: '试着张开手掌，唤醒你的第一段拾城记吧。',
+        done: '你的第一段拾城记已在你手中苏醒。' },
       { key: 'ask', icon: '📜💬', size: 17, name: '打破砂锅',
         locked: asks <= 5,
         cond: '向 AI 记忆讲述人累计提问超过 5 次（已问 ' + asks + ' 次）。',

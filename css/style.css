@@ -49,11 +49,12 @@ a{color:inherit}
 /* ---------- 顶栏 ---------- */
 .topbar{display:flex;align-items:center;gap:12px}
 .back{
-  width:34px;height:34px;flex:0 0 34px;border:1.5px solid var(--ink);border-radius:50%;
+  width:34px;height:34px;flex:0 0 34px;border:none;border-radius:50%;
   display:flex;align-items:center;justify-content:center;font-size:16px;
-  cursor:pointer;background:transparent;color:var(--ink);text-decoration:none;user-select:none;
+  cursor:pointer;background:var(--seal);color:#fff8ef;text-decoration:none;user-select:none;
+  box-shadow:0 3px 8px rgba(181,64,44,.35);font-weight:700;
 }
-.back:hover{background:var(--ink);color:var(--card)}
+.back:hover{background:#a03824;color:#fff8ef}
 .title{font-size:17px;font-weight:700;font-family:var(--serif);letter-spacing:2px}
 .spacer{flex:1}
 
@@ -109,7 +110,13 @@ a{color:inherit}
 }
 .tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2}
 .tab.active{color:var(--seal);font-weight:700}
-.tab.active svg{stroke:var(--seal)}
+.tab.active svg{stroke:#fff8ef}
+.tab .badge{
+  width:34px;height:34px;border-radius:50%;background:var(--seal);
+  display:flex;align-items:center;justify-content:center;margin-top:-3px;
+  box-shadow:0 3px 8px rgba(181,64,44,.35);
+}
+.tab .badge svg{width:18px;height:18px}
 .tab:hover{color:var(--seal)}
 
 /* ---------- Toast ---------- */

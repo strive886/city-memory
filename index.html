@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>登录 · 城市记忆盲盒</title>
+<title>登录 · 拾城记</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
 .emblem{display:flex;justify-content:center;margin-top:8px;filter:drop-shadow(0 10px 18px rgba(42,37,29,.28))}
@@ -19,7 +19,7 @@
 <div class="page-tag"><b>01</b>&nbsp;登录页 · LOGIN</div>
 <div class="phone">
   <div class="emblem">
-    <svg viewBox="0 0 132 132" width="128" height="128" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="城市记忆盲盒">
+    <svg viewBox="0 0 132 132" width="128" height="128" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="拾城记">
       <defs>
         <linearGradient id="lg_ink" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stop-color="#38312a"/>
@@ -149,7 +149,7 @@
       users[phone] = { pwd: pwd, nick: nick, hue: randHue(), createdAt: Date.now() };
       Store.set('users', users);
       Session.login({ id: phone, phone: phone, nick: nick, hue: users[phone].hue, isWx: false });
-      toast('注册成功，欢迎来到城市记忆盲盒');
+      toast('注册成功，欢迎来到拾城记');
       setTimeout(function(){ location.href = '03-home.html'; }, 600);
     }else{
       var u = users[phone];

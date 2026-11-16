@@ -1,5 +1,5 @@
 /* ============================================================
-   城市记忆盲盒 · 公共脚本
+   拾城记 · 公共脚本
    本地存储 / 登录会话 / Toast / 底部导航 / 通用工具
    课程作业约定：全部数据存于浏览器 localStorage，正式版接入云开发
    ============================================================ */
@@ -92,13 +92,16 @@ function confirmDialog(msg, onOk, opt){
 }
 window.confirmDialog = confirmDialog;
 
-/* ---------- 底部导航（自动注入当前页 active 状态） ---------- */
+/* ---------- 底部导航（自动注入当前页 active 状态；图标对齐规范：线性默认态 + 朱砂圆徽选中态） ---------- */
 var TAB_ICONS = {
-  home:  '<svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
-  book:  '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 4v16M4 9h5"/></svg>',
-  clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2.5"/></svg>',
-  me:    '<svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.5-3.5 4-5 7-5s5.5 1.5 7 5"/></svg>'
+  home:  '<path d="M4.5 10.5 12 4l7.5 6.5"/><path d="M6 9.8V19a1.6 1.6 0 0 0 1.6 1.6h8.8A1.6 1.6 0 0 0 18 19V9.8"/><path d="M10.2 20.6v-3.5a1.8 1.8 0 0 1 3.6 0v3.5"/>',
+  book:  '<path d="M12 7.2V5"/><path d="M4 10.5Q12 4.5 20 10.5"/><path d="M4 10.5q-.9-1-1-2.3M20 10.5q.9-1 1-2.3"/><path d="M8 16V9M16 16V9"/><path d="M6 16h12"/><path d="M4.5 18.8h15"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2.5"/>',
+  me:    '<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.5-3.5 4-5 7-5s5.5 1.5 7 5"/>'
 };
+function tabSvg(inner){
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>';
+}
 /* renderTabbar('home') 在 .phone 内最后一个 .tabbar 占位处填充；若无占位则追加 */
 function renderTabbar(active){
   var tabs = [
@@ -114,8 +117,11 @@ function renderTabbar(active){
     document.querySelector('.phone').appendChild(bar);
   }
   bar.innerHTML = tabs.map(function(t){
+    var icon = (t.key === active)
+      ? '<span class="badge">' + tabSvg(TAB_ICONS[t.key]) + '</span>'
+      : tabSvg(TAB_ICONS[t.key]);
     return '<a class="tab ' + (t.key === active ? 'active' : '') + '" href="' + t.href + '">' +
-             TAB_ICONS[t.key] + '<span>' + t.label + '</span></a>';
+             icon + '<span>' + t.label + '</span></a>';
   }).join('');
 }
 window.renderTabbar = renderTabbar;
@@ -211,7 +217,7 @@ var Ico = {
   pin:    '<path d="M12 21s-6.5-5.4-6.5-10.2a6.5 6.5 0 0 1 13 0C18.5 15.6 12 21 12 21z"/><circle cx="12" cy="10.6" r="2.4"/>',
   book:   '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M20 18H6.5A2.5 2.5 0 0 0 4 20.5"/>',
   clock:  '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2.5"/>',
-  card:   '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M3.5 10h17M7.5 14h6"/>',
+  card:   '<path d="M8.5 6.3V6a2.3 2.3 0 0 1 2.3-2.3h6.9A2.3 2.3 0 0 1 20 6v8.9a2.3 2.3 0 0 1-2.3 2.3h-.4"/><rect x="4" y="6.3" width="12.4" height="14.2" rx="2.3"/><path d="M7 13.4l2.5-2.2 2.5 2.2"/><path d="M7 15.8h5"/>',
   user:   '<circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c1.2-3.4 3.6-5 6.5-5s5.3 1.6 6.5 5"/>',
   trash:  '<path d="M4.5 6.5h15"/><path d="M9.5 6.5V5A1.5 1.5 0 0 1 11 3.5h2A1.5 1.5 0 0 1 14.5 5v1.5"/><path d="M6.5 6.5l1 13.5h9l1-13.5"/>',
   key:    '<circle cx="8" cy="15" r="3.5"/><path d="M10.6 12.4L19 4M15.5 7.5l2.5 2.5M13 10l2 2"/>',
@@ -220,16 +226,22 @@ var Ico = {
   edit:   '<path d="M4 20l1-4L16.5 4.5a2.12 2.12 0 0 1 3 3L8 19z"/>',
   lock:   '<rect x="5.5" y="10.5" width="13" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>',
   report: '<path d="M4 10.5v3.5l3 .5 8 4.5V5.5l-8 4.5z"/><path d="M17.5 9.5a4.5 4.5 0 0 1 0 5.5"/>',
-  link:   '<path d="M9.5 14.5l5-5"/><path d="M13.2 6.3l1.3-1.3a3.5 3.5 0 0 1 5 5L18.2 11.3"/><path d="M10.8 17.7l-1.3 1.3a3.5 3.5 0 0 1-5-5l1.3-1.3"/>',
+  link:   '<circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="6" r="2.6"/><circle cx="17.5" cy="18" r="2.6"/><path d="M8.4 10.9l6.7-3.7M8.4 13.1l6.7 3.7"/>',
   gift:   '<path d="M6 10.5h12V20H6z"/><path d="M4.5 7.5h15v3h-15z"/><path d="M12 7.5V20"/><path d="M12 7.5c-2.2 0-4.2-1-4.2-2.4C7.8 3.8 9 3.2 10 3.8c1.1.6 2 2.2 2 3.7.0-1.5.9-3.1 2-3.7 1-.6 2.2 0 2.2 1.3 0 1.4-2 2.4-4.2 2.4z"/>',
   spark:  '<path d="M12 4l1.8 4.6L18 10l-4.2 1.4L12 16l-1.8-4.6L6 10l4.2-1.4z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
   star:   '<path d="M12 3.5l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/>',
   stop:   '<rect x="7" y="7" width="10" height="10" rx="1.5"/>',
   box:    '<path d="M4 8l8-4.5L20 8v8l-8 4.5L4 16z"/><path d="M4 8l8 4.5L20 8M12 12.5V20.5"/>',
   phone:  '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M10.5 17.5h3"/>',
-  chat:   '<path d="M21 12a8 8 0 0 1-11.6 7.1L4.5 20l1.2-4.1A8 8 0 1 1 21 12z"/>',
-  check:  '<path d="M4.5 12.5l5 5L19.5 6.5"/>'
+  chat:   '<path d="M14.5 4.5h1.6A3.9 3.9 0 0 1 20 8.4v2"/><path d="M4 11.2a4.9 4.9 0 0 1 4.9-4.9h4.2a4.9 4.9 0 0 1 .4 9.8l-4.3 3.4.5-3A4.9 4.9 0 0 1 4 11.2z"/><circle cx="8.2" cy="11.3" r=".95" fill="currentColor" stroke="none"/><circle cx="11.5" cy="11.3" r=".95" fill="currentColor" stroke="none"/><circle cx="14.8" cy="11.3" r=".95" fill="currentColor" stroke="none"/>',
+  check:  '<path d="M4.5 12.5l5 5L19.5 6.5"/>',
+  grab:   '<path d="M4.5 8V6.6A2.1 2.1 0 0 1 6.6 4.5H8M16 4.5h1.4A2.1 2.1 0 0 1 19.5 6.6V8M19.5 16v1.4a2.1 2.1 0 0 1-2.1 2.1H16M8 19.5H6.6A2.1 2.1 0 0 1 4.5 17.4V16"/><path d="M8.3 16.6c-1-.7-1.6-1.5-1.6-2.6v-2.6a1.25 1.25 0 0 1 2.5 0v-1.2a1.25 1.25 0 0 1 2.5 0V9a1.25 1.25 0 0 1 2.5 0v.7a1.25 1.25 0 0 1 2.5 0v3.5c0 2.1-1.5 3.3-3.3 3.4z"/>',
+  brush:  '<g transform="rotate(45 12 12)"><rect x="9.2" y="3.2" width="5.6" height="6" rx="1.2"/><rect x="8.2" y="9.2" width="7.6" height="7.4" rx="2.6"/></g><circle cx="5.2" cy="19" r=".8" fill="currentColor" stroke="none"/><circle cx="18.8" cy="19" r=".8" fill="currentColor" stroke="none"/>',
+  spread: '<path d="M9.5 12H3.5M6 9.5 3.5 12 6 14.5"/><path d="M14.5 12h6M18 9.5l2.5 2.5L18 14.5"/>',
+  robot:  '<rect x="5" y="8.2" width="14" height="10.6" rx="3"/><circle cx="12" cy="4.6" r="1.5"/><path d="M12 6.1v2.1"/><path d="M3.2 12.5v2.6M20.8 12.5v2.6"/><circle cx="9.3" cy="13.2" r="1.15"/><circle cx="14.7" cy="13.2" r="1.15"/><path d="M10 16.2h4"/>',
+  medal:  '<circle cx="12" cy="8.8" r="4.6"/><path d="M12 6.6l.75 1.5 1.65.25-1.2 1.2.3 1.65L12 10.4l-1.5.8.3-1.65-1.2-1.2 1.65-.25z"/><path d="M9.4 12.8 7.2 19.6l4.8-2.8 4.8 2.8-2.2-6.8"/>'
 };
+window.Ico = Ico;
 window.ico = function(name, size, color){
   size = size || 16;
   return '<svg class="ico" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="' + (color || 'currentColor') + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + Ico[name] + '</svg>';

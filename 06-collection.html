@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>我的图鉴 · 城市记忆盲盒</title>
+<title>我的图鉴 · 拾城记</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
 .citytabs{display:flex;gap:8px}
@@ -187,19 +187,19 @@
     c.fillStyle = '#2a251d';
     c.beginPath(); if(c.roundRect) c.roundRect(46, 44, 40, 40, 10); else c.rect(46, 44, 40, 40); c.fill();
     c.fillStyle = '#c8a24b'; c.font = '22px serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-    c.fillText('城', 66, 65);
+    c.fillText('拾', 66, 65);
     c.fillStyle = '#2a251d'; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
     c.font = 'bold 21px "Noto Serif SC","Songti SC","SimSun",serif';
     c.fillText('收集战报', 100, 60);
     c.font = '11px sans-serif'; c.fillStyle = '#8a8377';
-    c.fillText('CITY MEMORY BLIND BOX · 收集进度一览', 100, 79);
+    c.fillText('SHI CHENG JI · 收集进度一览', 100, 79);
 
     /* 总进度 */
     c.textAlign = 'center'; c.textBaseline = 'middle';
     c.fillStyle = '#b5402c'; c.font = 'bold 56px "Noto Serif SC","Songti SC","SimSun",serif';
     c.fillText(totalGot + ' / ' + totalAll, W / 2, 156);
     c.fillStyle = '#8a6a1e'; c.font = '13px sans-serif';
-    c.fillText('已点亮 ' + litCities + ' 座城市 · 每一件都是一段城市记忆', W / 2, 198);
+    c.fillText('已点亮 ' + litCities + ' 座城市 · 每一件都是一段拾城记', W / 2, 198);
 
     /* 两城进度块 */
     var y0 = 232;
@@ -262,7 +262,7 @@
     c.fillStyle = '#2a251d'; c.font = 'bold 17px "Noto Serif SC","Songti SC","SimSun",serif';
     c.fillText(user.nick + ' 的收集战报', 180, qy + 18);
     c.font = '12.5px sans-serif'; c.fillStyle = '#8a8377';
-    c.fillText(fmtDate(Date.now()) + ' · 已收集 ' + totalGot + ' 件城市记忆', 180, qy + 46);
+    c.fillText(fmtDate(Date.now()) + ' · 已收集 ' + totalGot + ' 段拾城记', 180, qy + 46);
     c.fillStyle = '#b5402c'; c.font = '13px "Noto Serif SC","Songti SC",serif';
     c.fillText('把城市装进口袋 🎁', 180, qy + 74);
     return cv;
@@ -276,7 +276,7 @@
       onOk: function(){
         try{
           var a = document.createElement('a');
-          a.download = '城市记忆盲盒·收集战报.png';
+          a.download = '拾城记·收集战报.png';
           a.href = cv.toDataURL('image/png');
           a.click();
           toast('战报已保存（下载到本地）🖼️');

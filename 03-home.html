@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>首页 · 城市记忆盲盒</title>
+<title>首页 · 拾城记</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
 .stage{
@@ -89,15 +89,15 @@
   <div class="citymenu" id="cityMenu"></div>
 
   <div class="stage">
-    <span class="ribbon" id="cityRibbon">城市记忆 · 石家庄</span>
+    <span class="ribbon" id="cityRibbon">拾城记 · 石家庄</span>
     <div class="orb" id="orb" title="点我抓取">🎁</div>
-    <div class="hint" id="stageHint">伸出手握个拳 · 拆开城市记忆盲盒</div>
+    <div class="hint" id="stageHint">伸出手握个拳 · 拾起一段拾城记</div>
   </div>
 
-  <a class="btn seal" href="04-grab.html" id="grabBtn">抓取城市记忆盲盒</a>
+  <a class="btn seal" href="04-grab.html" id="grabBtn">抓取一枚拾城记</a>
 
   <div id="relayLine" style="display:none;font-size:12px;color:var(--ink-2);text-align:center;margin-top:-8px">
-    <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 14.5l5-5"/><path d="M13.2 6.3l1.3-1.3a3.5 3.5 0 0 1 5 5L18.2 11.3"/><path d="M10.8 17.7l-1.3 1.3a3.5 3.5 0 0 1-5-5l1.3-1.3"/></svg> 经由「<b id="relayName" style="color:var(--seal)"></b>」的链接来到这里 · 去抓一件回应 TA
+    <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="6" r="2.6"/><circle cx="17.5" cy="18" r="2.6"/><path d="M8.4 10.9l6.7-3.7M8.4 13.1l6.7 3.7"/></svg> 经由「<b id="relayName" style="color:var(--seal)"></b>」的链接来到这里 · 去抓一件回应 TA
   </div>
 
   <div style="display:flex;align-items:center">
@@ -171,14 +171,14 @@
       autoLocate(true);
     };
 
-    document.getElementById('cityRibbon').textContent = '城市记忆 · ' + city.name;
+    document.getElementById('cityRibbon').textContent = '拾城记 · ' + city.name;
     var gotAll = got >= ids.length;
     document.getElementById('grabBtn').textContent = gotAll
-      ? '盲盒已集齐 · 再抽一次碰碰运气' : '抓取城市记忆盲盒';
+      ? '盲盒已集齐 · 再抽一次碰碰运气' : '抓取一枚拾城记';
     document.getElementById('orb').innerHTML = ico(gotAll ? 'spark' : 'gift', 36, gotAll ? '#7a4a12' : '#fff8ef');
     document.getElementById('stageHint').textContent = gotAll
       ? '记忆已集齐 · 再拆一次碰碰运气'
-      : '伸出手握个拳 · 拆开城市记忆盲盒';
+      : '伸出手握个拳 · 拾起一段拾城记';
 
     /* 好友接力来源 */
     var relay = Store.get('relay', null);

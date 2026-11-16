@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>数字纪念卡 · 城市记忆盲盒</title>
+<title>数字纪念卡 · 拾城记</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
 .mcard{border:1.5px solid var(--ink);border-radius:var(--r-lg);overflow:hidden;background:#fff}
@@ -164,12 +164,12 @@
     ctx.fillStyle = '#2a251d';
     ctx.beginPath(); ctx.roundRect ? ctx.roundRect(46, 46, 40, 40, 10) : ctx.rect(46, 46, 40, 40); ctx.fill();
     ctx.fillStyle = '#c8a24b'; ctx.font = '24px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('城', 66, 67);
+    ctx.fillText('拾', 66, 67);
     ctx.fillStyle = '#2a251d'; ctx.textAlign = 'left';
     ctx.font = 'bold 21px "Noto Serif SC","Songti SC","SimSun",serif';
-    ctx.fillText('城市记忆盲盒', 100, 58);
+    ctx.fillText('拾城记', 100, 58);
     ctx.font = '12px sans-serif'; ctx.fillStyle = '#8a8377';
-    ctx.fillText('CITY MEMORY BLIND BOX · AI + 手势识别', 100, 80);
+    ctx.fillText('SHI CHENG JI · AI + 手势识别', 100, 80);
     ctx.textAlign = 'right'; ctx.font = '13px Consolas,monospace'; ctx.fillStyle = '#b5402c';
     var no = 0; for(var i = 0; i < curId.length; i++) no = (no * 31 + curId.charCodeAt(i)) % 1000;
     ctx.fillText('NO.' + String(no + 1).padStart(3, '0'), W - 50, 60);
@@ -225,9 +225,9 @@
     drawQR(58, gy + 70, 104);
     ctx.textAlign = 'left'; ctx.fillStyle = '#2a251d';
     ctx.font = 'bold 17px "Noto Serif SC","Songti SC","SimSun",serif';
-    ctx.fillText(escapeHtml(user.nick) + ' 的城市记忆', 178, gy + 86);
+    ctx.fillText(escapeHtml(user.nick) + ' 的拾城记', 178, gy + 86);
     ctx.font = '12.5px sans-serif'; ctx.fillStyle = '#8a8377';
-    ctx.fillText(fmtDate(Date.now()) + ' 收藏于「城市记忆盲盒」', 178, gy + 112);
+    ctx.fillText(fmtDate(Date.now()) + ' 收藏于「拾城记」', 178, gy + 112);
     ctx.fillStyle = '#b5402c'; ctx.font = '13px "Noto Serif SC","Songti SC",serif';
     ctx.fillText('把城市装进口袋 🎁', 178, gy + 134);
   }
@@ -260,7 +260,7 @@
   document.getElementById('saveBtn').onclick = function(){
     try{
       var a = document.createElement('a');
-      a.download = '城市记忆盲盒·' + item.name + '.png';
+      a.download = '拾城记·' + item.name + '.png';
       a.href = cv.toDataURL('image/png');
       a.click();
       toast('纪念卡已保存（下载到本地）🖼️');

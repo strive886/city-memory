@@ -1,5 +1,5 @@
 /* ============================================================
-   城市记忆盲盒 · 数据层 + AI 智能体（本地模拟）
+   拾城记 · 数据层 + AI 智能体（本地模拟）
    - 首批两个城市：石家庄 / 正定，各 8 件老物件
    - 每件物件：80 字左右记忆故事 + 问答知识库（对应方案书 RAG 知识库）
    - AI.reply 为本地知识库模拟；正式版替换为 Coze / Dify API 调用
@@ -265,7 +265,7 @@ var AI = (function(){
   }
 
   function sysPrompt(){
-    return '你是「城市记忆讲述人」，为网页应用"城市记忆盲盒"的用户讲述中国城市老物件背后的故事。' +
+    return '你是「拾城讲述人」，为网页应用「拾城记」的用户讲述中国城市老物件背后的故事。' +
       '规则：1) 优先依据【知识库资料】回答，不编造具体史实，资料不足时用可靠的常识补充，语气留有余地；' +
       '2) 口吻像健谈的老街坊，亲切、有画面感；3) 单次回答不超过120字；' +
       '4) 只聊城市历史、老物件、民俗文化相关话题，用户跑题时礼貌拉回；5) 直接输出正文，不要标题、不要自我介绍。';
@@ -347,7 +347,7 @@ var AI = (function(){
       if(cached) return Promise.resolve(cached);
       return chatCall([
         { role: 'system', content: sysPrompt() },
-        { role: 'user', content: '请依据下面资料，为这件老物件写一段80字左右的城市记忆故事：第一句带年代感，结尾留一点余味。直接输出正文。\n\n' + knowledge(itemId) }
+        { role: 'user', content: '请依据下面资料，为这件老物件写一段80字左右的拾城记故事：第一句带年代感，结尾留一点余味。直接输出正文。\n\n' + knowledge(itemId) }
       ]).then(function(txt){
         try{ sessionStorage.setItem('cmb_aistory_' + itemId, txt); }catch(e){}
         return txt;

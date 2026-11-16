@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>手势抓取 · 城市记忆盲盒</title>
+<title>手势抓取 · 拾城记</title>
 <link rel="stylesheet" href="css/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js" defer></script>
 <style>
@@ -96,7 +96,9 @@
   font-size:11px;color:var(--ink-3);transition:all .25s;
 }
 .gstep b{font-size:12px;color:var(--ink-2)}
-.gstep .gi{font-size:19px}
+.gstep .gi{font-size:19px;line-height:1;color:var(--ink-2)}
+.gstep .gi svg{display:block;margin:0 auto}
+.gstep.active .gi{color:var(--seal)}
 .gstep.active{border-color:var(--seal);background:rgba(181,64,44,.07)}
 .gstep.active b{color:var(--seal)}
 .demorow{display:flex;gap:7px}
@@ -150,9 +152,9 @@
   <div class="hud"><span class="dot off" id="hudDot"></span><span id="hudText">点击「开启手势识别」授权摄像头，或直接用下方演示按钮</span></div>
 
   <div class="gsteps">
-    <div class="gstep" id="gs-grab"><span class="gi">✊</span><b>握拳 · 抓取</b><i>光球炸开出现物件</i></div>
-    <div class="gstep" id="gs-clean"><span class="gi">🖐</span><b>挥手 · 清理</b><i>掌心平移 擦去尘土</i></div>
-    <div class="gstep" id="gs-pull"><span class="gi">👐</span><b>双手拉开</b><i>触发 AI 讲故事</i></div>
+    <div class="gstep" id="gs-grab"><span class="gi" id="gi-grab"></span><b>握拳 · 抓取</b><i>光球炸开出现物件</i></div>
+    <div class="gstep" id="gs-clean"><span class="gi" id="gi-clean"></span><b>挥手 · 清理</b><i>掌心平移 擦去尘土</i></div>
+    <div class="gstep" id="gs-pull"><span class="gi" id="gi-pull"></span><b>双手拉开</b><i>触发 AI 讲故事</i></div>
   </div>
 
   <div class="demorow">
@@ -200,6 +202,10 @@
       document.getElementById('gs-' + k).classList.toggle('active', k === name);
     });
   }
+  /* 步骤图标（对齐图标规范：手势抓取 / 考古清理 / 双手拉开） */
+  document.getElementById('gi-grab').innerHTML = ico('grab', 19);
+  document.getElementById('gi-clean').innerHTML = ico('brush', 19);
+  document.getElementById('gi-pull').innerHTML = ico('spread', 19);
   setStep('grab');
 
   /* ---------- 抓取动画 ---------- */
