@@ -33,8 +33,6 @@ body{
 a{color:inherit}
 
 /* ---------- 作业展示壳：页码标签 + 手机 + 翻页 ---------- */
-.page-tag{font-size:13px;color:var(--ink-3);letter-spacing:3px;margin-bottom:14px}
-.page-tag b{color:var(--seal);font-size:15px;letter-spacing:1px}
 .phone{
   width:390px;max-width:100%;
   background:var(--card);
