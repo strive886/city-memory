@@ -8,7 +8,7 @@
 <style>
 .date{font-size:11.5px;color:var(--ink-3);margin:4px 0 -2px 2px;letter-spacing:1px}
 .rec{
-  display:flex;align-items:center;gap:12px;border:1.5px solid var(--ink);border-radius:var(--r-md);
+  display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:var(--r-md);
   padding:10px 12px;text-decoration:none;color:var(--ink);background:var(--card);
 }
 .rec:hover{background:#fbf6ea}
@@ -16,9 +16,8 @@
   width:46px;height:46px;flex:0 0 46px;border-radius:10px;border:1.5px solid var(--line);
   display:flex;align-items:center;justify-content:center;font-size:22px;
 }
-.rec .meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.rec .meta b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rec .meta span{font-size:11px;color:var(--ink-3)}
+.rec b{flex:1;min-width:0;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec .rmeta{font-size:11px;color:var(--ink-3);white-space:nowrap}
 .rec .chev{color:var(--ink-3);font-size:17px}
 .headrow{display:flex;align-items:center}
 .headrow .title{flex:1}
@@ -35,8 +34,8 @@
 <body>
 <div class="phone">
   <div class="topbar">
-    <a class="back" href="03-home.html">←</a>
-    <div class="headrow" style="flex:1"><div class="title">浏览记录</div></div>
+    <a class="back" href="03-home.html">&lt;</a>
+    <div class="spacer"></div>
     <span class="clear" id="clearBtn">清空</span>
   </div>
 
@@ -112,8 +111,8 @@
       var ah = itemArt(it.id, 38);
       html += '<a class="rec" href="05-chat.html?item=' + it.id + '">' +
         '<div class="thumb" style="' + (ah ? 'background:radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%);border-color:#4a4030' : 'background:hsl(' + it.hue + ',42%,90%)') + '">' + (ah || it.emoji) + '</div>' +
-        '<div class="meta"><b>' + it.name + '</b><span>' + city.name + ' · ' + fmtTime(r.ts) + '</span></div>' +
-        (Biz.isCollected(it.id) ? '<span class="chip seal" style="font-size:10px;padding:2px 8px">已收藏</span>' : '') +
+        '<b>' + it.name + '</b>' +
+        '<span class="rmeta">' + city.name + ' · ' + fmtTime(r.ts) + '</span>' +
         '<span class="chev">›</span></a>';
     });
     box.innerHTML = html;

@@ -25,20 +25,23 @@
 .stage .ribbon{position:absolute;top:12px;left:14px;font-family:var(--serif);font-size:12px;color:var(--seal);letter-spacing:3px;opacity:.8}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .slot{
-  border:1.5px solid var(--ink);border-radius:var(--r-md);padding:8px 5px 9px;
-  display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
+  border:1.5px solid var(--ink);border-radius:var(--r-md);padding:6px 5px 7px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;
   text-decoration:none;color:var(--ink);transition:transform .15s;background:var(--card);
 }
 .slot:hover{transform:translateY(-2px)}
 .slot .thumb{
-  width:100%;height:52px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  width:100%;height:58px;border-radius:8px;display:flex;align-items:center;justify-content:center;
   border:1.5px solid var(--line);
 }
 .slot .nm{font-size:10px;line-height:1.35;text-align:center;color:var(--ink-2);height:27px;overflow:hidden}
-.slot .tag{font-size:9px;color:var(--gold);letter-spacing:1px}
 .slot.locked{border-style:dashed;border-color:var(--line);cursor:pointer;background:#fbf8f0}
 .slot.locked:hover{background:#f6efdf}
-.slot.locked .thumb{background:#f3edde;border-style:dashed;color:#c9bfa9;font-size:22px;font-weight:700}
+.slot.locked .qmark{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  min-height:90px;   /* 与「插画58+间距5+名字27」等高，保证整行全灰时格子高度一致 */
+  font-size:40px;font-weight:700;color:#c9bfa9;line-height:1;
+}
 .closing-hint{
   text-align:center;font-size:12px;color:var(--ink-2);letter-spacing:1.5px;
   margin:6px 0 2px;display:flex;align-items:center;justify-content:center;gap:8px;
@@ -99,19 +102,10 @@
     <svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="6" r="2.6"/><circle cx="17.5" cy="18" r="2.6"/><path d="M8.4 10.9l6.7-3.7M8.4 13.1l6.7 3.7"/></svg> 经由「<b id="relayName" style="color:var(--seal)"></b>」的链接来到这里 · 去抓一件回应 TA
   </div>
 
-  <div style="display:flex;align-items:center">
-    <span style="font-size:13.5px;font-weight:700;font-family:var(--serif);letter-spacing:1px" id="gridTitle">我的图鉴</span>
-    <div class="spacer"></div>
-    <a href="08-card.html?from=home" style="font-size:12px;color:var(--ink-3);text-decoration:none">纪念卡 ›</a>
-    <a href="06-collection.html" style="font-size:12px;color:var(--ink-3);text-decoration:none;margin-left:10px">图鉴 ›</a>
-  </div>
+  <span style="font-size:13.5px;font-weight:700;font-family:var(--serif);letter-spacing:1px" id="gridTitle">我的图鉴</span>
   <div class="grid4" id="grid"></div>
 
-  <div style="display:flex;align-items:center;margin-top:0">
-    <span style="font-size:13.5px;font-weight:700;font-family:var(--serif);letter-spacing:1px" id="carTitle">全部图鉴</span>
-    <div class="spacer"></div>
-    <a href="06-collection.html" style="font-size:12px;color:var(--ink-3);text-decoration:none">图鉴 ›</a>
-  </div>
+  <span style="font-size:13.5px;font-weight:700;font-family:var(--serif);letter-spacing:1px" id="carTitle">全部图鉴</span>
   <div class="carousel" id="carousel"><div class="car-track" id="carTrack"></div></div>
 
   <div class="closing-hint" id="closingHint">光球里藏着一枚老物件 · 快来探索吧</div>
@@ -187,20 +181,18 @@
       relayLine.style.display = 'block';
     }else relayLine.style.display = 'none';
 
-    /* 我的图鉴格（当前城市 8 件，收藏点亮） */
-    document.getElementById('gridTitle').textContent = '我的图鉴 · ' + city.name + ' ' + got + '/' + ids.length;
+    /* 我的图鉴格（当前城市 8 件，收藏点亮；插画+名字占满方框） */
     document.getElementById('grid').innerHTML = ids.map(function(id){
       var it = ITEM_DATA[id];
       if(collected[id]){
-        var ah = itemArt(id, 40);
+        var ah = itemArt(id, 46);
         return '<a class="slot" href="05-chat.html?item=' + id + '">' +
           '<div class="thumb" style="' + (ah ?
             'background:radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%);border-color:#4a4030' :
             'background:hsl(' + it.hue + ',42%,90%)') + '">' + (ah || it.emoji) + '</div>' +
-          '<div class="nm">' + it.name + '</div><span class="tag">' + it.era + '</span></a>';
+          '<div class="nm">' + it.name + '</div></a>';
       }
-      return '<div class="slot locked"><div class="thumb">?</div>' +
-        '<div class="nm" style="color:#c9bfa9">？？？？</div><span class="tag">未解锁</span></div>';
+      return '<div class="slot locked"><span class="qmark">?</span></div>';
     }).join('');
     document.querySelectorAll('#grid .slot.locked').forEach(function(el){
       el.onclick = function(){
@@ -292,8 +284,6 @@
       var j = Math.floor(Math.random() * (i + 1));
       var t = items[i]; items[i] = items[j]; items[j] = t;
     }
-    document.getElementById('carTitle').textContent = '全部图鉴 · ' + items.length + ' 件';
-
     var got = Biz.collected();
     var box = document.getElementById('carousel'), track = document.getElementById('carTrack');
     track.innerHTML = items.concat(items).map(function(id){
@@ -302,7 +292,7 @@
         (got[id] ? '<i class="got">✓</i>' : '') +
         '<div class="thumb">' + (itemArt(id, 42) || it.emoji) + '</div>' +
         '<div class="nm">' + it.name + '</div>' +
-        '<span class="meta">' + ct.name + ' · ' + it.era + '</span></a>';
+        '<span class="meta">' + ct.name + '</span></a>';
     }).join('');
 
     var half = 0, offset = 0, dragging = false, hover = false, lastX = 0, moved = 0, lastT = 0;

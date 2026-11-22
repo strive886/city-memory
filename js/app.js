@@ -92,7 +92,7 @@ function confirmDialog(msg, onOk, opt){
 }
 window.confirmDialog = confirmDialog;
 
-/* ---------- 底部导航（自动注入当前页 active 状态；图标对齐规范：线性默认态 + 朱砂圆徽选中态） ---------- */
+/* ---------- 底部导航（自动注入当前页 active 状态；选中/未选中同尺寸，选中态 = 朱砂着色，标签字间留空格） ---------- */
 var TAB_ICONS = {
   home:  '<path d="M4.5 10.5 12 4l7.5 6.5"/><path d="M6 9.8V19a1.6 1.6 0 0 0 1.6 1.6h8.8A1.6 1.6 0 0 0 18 19V9.8"/><path d="M10.2 20.6v-3.5a1.8 1.8 0 0 1 3.6 0v3.5"/>',
   book:  '<path d="M12 7.2V5"/><path d="M4 10.5Q12 4.5 20 10.5"/><path d="M4 10.5q-.9-1-1-2.3M20 10.5q.9-1 1-2.3"/><path d="M8 16V9M16 16V9"/><path d="M6 16h12"/><path d="M4.5 18.8h15"/>',
@@ -105,10 +105,10 @@ function tabSvg(inner){
 /* renderTabbar('home') 在 .phone 内最后一个 .tabbar 占位处填充；若无占位则追加 */
 function renderTabbar(active){
   var tabs = [
-    {key:'home',  label:'首页', href:'03-home.html'},
-    {key:'book',  label:'图鉴', href:'06-collection.html'},
-    {key:'clock', label:'记录', href:'07-history.html'},
-    {key:'me',    label:'我的', href:'09-profile.html'}
+    {key:'home',  label:'首 页', href:'03-home.html'},
+    {key:'book',  label:'图 鉴', href:'06-collection.html'},
+    {key:'clock', label:'记 录', href:'07-history.html'},
+    {key:'me',    label:'我 的', href:'09-profile.html'}
   ];
   var bar = document.querySelector('.phone .tabbar');
   if(!bar){
@@ -117,11 +117,8 @@ function renderTabbar(active){
     document.querySelector('.phone').appendChild(bar);
   }
   bar.innerHTML = tabs.map(function(t){
-    var icon = (t.key === active)
-      ? '<span class="badge">' + tabSvg(TAB_ICONS[t.key]) + '</span>'
-      : tabSvg(TAB_ICONS[t.key]);
     return '<a class="tab ' + (t.key === active ? 'active' : '') + '" href="' + t.href + '">' +
-             icon + '<span>' + t.label + '</span></a>';
+             tabSvg(TAB_ICONS[t.key]) + '<span>' + t.label + '</span></a>';
   }).join('');
 }
 window.renderTabbar = renderTabbar;

@@ -30,7 +30,7 @@
 <body>
 <div class="phone">
   <div class="topbar">
-    <a class="back" href="05-chat.html" id="backBtn">←</a>
+    <a class="back" href="05-chat.html" id="backBtn">&lt;</a>
     <div class="title">数字纪念卡</div>
   </div>
 
@@ -167,8 +167,6 @@
     ctx.fillStyle = '#2a251d'; ctx.textAlign = 'left';
     ctx.font = 'bold 21px "Noto Serif SC","Songti SC","SimSun",serif';
     ctx.fillText('拾城记', 100, 58);
-    ctx.font = '12px sans-serif'; ctx.fillStyle = '#8a8377';
-    ctx.fillText('SHI CHENG JI · AI + 手势识别', 100, 80);
     ctx.textAlign = 'right'; ctx.font = '13px Consolas,monospace'; ctx.fillStyle = '#b5402c';
     var no = 0; for(var i = 0; i < curId.length; i++) no = (no * 31 + curId.charCodeAt(i)) % 1000;
     ctx.fillText('NO.' + String(no + 1).padStart(3, '0'), W - 50, 60);
@@ -190,12 +188,10 @@
     ctx.beginPath(); ctx.arc(W / 2, 258, 104, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
 
-    /* 名称与年代 */
+    /* 名称 */
     ctx.fillStyle = '#2a251d';
     ctx.font = 'bold 30px "Noto Serif SC","Songti SC","SimSun",serif';
     ctx.fillText(item.name, W / 2, 398);
-    ctx.font = '14px sans-serif'; ctx.fillStyle = '#8a8377';
-    ctx.fillText(item.en + '　·　' + item.era + '　·　' + city.name, W / 2, 430);
 
     /* 分隔线 */
     ctx.strokeStyle = 'rgba(181,64,44,.4)'; ctx.lineWidth = 1;

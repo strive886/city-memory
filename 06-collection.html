@@ -14,20 +14,23 @@
 .citytabs .ctab.on{border-color:var(--seal);color:var(--seal);font-weight:700;background:rgba(181,64,44,.06)}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .slot{
-  border:1.5px solid var(--ink);border-radius:var(--r-md);padding:8px 5px 9px;
-  display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
+  border:1.5px solid var(--ink);border-radius:var(--r-md);padding:6px 5px 7px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;
   text-decoration:none;color:var(--ink);transition:transform .15s;background:var(--card);
 }
 .slot:hover{transform:translateY(-2px)}
 .slot .thumb{
-  width:100%;height:52px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  width:100%;height:58px;border-radius:8px;display:flex;align-items:center;justify-content:center;
   font-size:27px;border:1.5px solid var(--line);
 }
 .slot .nm{font-size:10px;line-height:1.35;text-align:center;color:var(--ink-2);height:27px;overflow:hidden}
 .slot.locked{border-style:dashed;border-color:var(--line);cursor:pointer;background:#fbf8f0}
 .slot.locked:hover{background:#f6efdf}
-.slot.locked .thumb{background:#f3edde;border-style:dashed;color:#c9bfa9;font-size:22px;font-weight:700}
-.slot .tag{font-size:9px;color:var(--gold);letter-spacing:1px}
+.slot.locked .qmark{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  min-height:90px;   /* 与「插画58+间距5+名字27」等高，保证整行全灰时格子高度一致 */
+  font-size:40px;font-weight:700;color:#c9bfa9;line-height:1;
+}
 .hiddenbox{
   border:1.5px dashed var(--seal);border-radius:var(--r-md);padding:13px 15px;
   display:flex;align-items:center;gap:13px;background:rgba(181,64,44,.04);
@@ -40,10 +43,7 @@
 <body>
 <div class="phone">
   <div class="topbar">
-    <a class="back" href="03-home.html">←</a>
-    <div class="title">我的图鉴</div>
-    <div class="spacer"></div>
-    <span class="chip ghost" id="totalChip">—</span>
+    <a class="back" href="03-home.html">&lt;</a>
   </div>
 
   <div class="box" style="padding:14px 16px;display:flex;align-items:center;gap:12px">
@@ -58,7 +58,6 @@
 
   <div class="hiddenbox" id="hiddenBox"></div>
 
-  <div class="note">点击已收集的物件可重听 AI 讲故事；集齐一城全部物件解锁隐藏故事</div>
   <div class="tabbar"></div>
 </div>
 
@@ -76,16 +75,12 @@
 
   function render(){
     var collected = Biz.collected();
-    var totalGot = Object.keys(collected).length, totalAll = 0;
     var city = CITY_DATA[cur];
 
-    document.getElementById('progLabel').textContent = city.name + ' 已收集 ' +
+    document.getElementById('progLabel').textContent = '已收集 ' +
       city.items.filter(function(id){ return collected[id]; }).length + ' / ' + city.items.length;
     document.getElementById('progFill').style.width =
       (city.items.filter(function(id){ return collected[id]; }).length / city.items.length * 100) + '%';
-
-    Object.keys(CITY_DATA).forEach(function(id){ totalAll += CITY_DATA[id].items.length; });
-    document.getElementById('totalChip').textContent = '两城合计 ' + totalGot + '/' + totalAll;
 
     document.getElementById('cityTabs').innerHTML = Object.keys(CITY_DATA).map(function(id){
       var c = CITY_DATA[id];
@@ -101,13 +96,12 @@
       var it = ITEM_DATA[id];
       if(collected[id]){
         return '<a class="slot" href="05-chat.html?item=' + id + '">' +
-          '<div class="thumb" style="' + (itemArt(id, 40) ?
+          '<div class="thumb" style="' + (itemArt(id, 46) ?
             'background:radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%);border-color:#4a4030' :
-            'background:hsl(' + it.hue + ',42%,90%)') + '">' + (itemArt(id, 40) || it.emoji) + '</div>' +
-          '<div class="nm">' + it.name + '</div><span class="tag">' + it.era + '</span></a>';
+            'background:hsl(' + it.hue + ',42%,90%)') + '">' + (itemArt(id, 46) || it.emoji) + '</div>' +
+          '<div class="nm">' + it.name + '</div></a>';
       }
-      return '<div class="slot locked" data-locked="1"><div class="thumb">?</div>' +
-        '<div class="nm" style="color:#c9bfa9">？？？？</div><span class="tag">未解锁</span></div>';
+      return '<div class="slot locked" data-locked="1"><span class="qmark">?</span></div>';
     }).join('');
 
     /* 未解锁灰格：点击给引导 */

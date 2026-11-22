@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js" defer></script>
 <style>
 .cam{
-  position:relative;height:328px;border:1.5px solid var(--ink);border-radius:var(--r-lg);
+  position:relative;flex:1;min-height:400px;border:1.5px solid var(--ink);border-radius:var(--r-lg);
   overflow:hidden;background:radial-gradient(320px 220px at 50% 60%, #322a20, #1c1812 75%);
 }
 .cam video,.cam canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:none}
@@ -89,27 +89,30 @@
 .dot.off{background:#b9b0a0;animation:none}
 .dot.ok{background:var(--green)}
 
-.gsteps{display:flex;gap:8px}
-.gstep{
-  flex:1;border:1.5px solid var(--line);border-radius:var(--r-md);padding:9px 4px;
-  display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;
-  font-size:11px;color:var(--ink-3);transition:all .25s;
+.gsteps{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:6;
+  display:flex;flex-direction:column;gap:10px;width:96px;
 }
-.gstep b{font-size:12px;color:var(--ink-2)}
-.gstep .gi{font-size:19px;line-height:1;color:var(--ink-2)}
+.cam.cam-on .gsteps{display:none}   /* 摄像头开启后隐藏右侧步骤卡，保持画面干净 */
+.gstep{
+  border:1.5px solid rgba(216,207,191,.4);border-radius:12px;padding:11px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;
+  background:rgba(20,16,10,.55);backdrop-filter:blur(2px);transition:all .25s;
+}
+.gstep b{font-size:11.5px;color:#e8e0d0;letter-spacing:1px}
+.gstep .gi{font-size:19px;line-height:1;color:#d8cfbf}
 .gstep .gi svg{display:block;margin:0 auto}
-.gstep.active .gi{color:var(--seal)}
-.gstep.active{border-color:var(--seal);background:rgba(181,64,44,.07)}
-.gstep.active b{color:var(--seal)}
-.demorow{display:flex;gap:7px}
+.gstep.active{border-color:var(--gold);background:rgba(200,162,75,.2)}
+.gstep.active .gi{color:#f7e9c8}
+.gstep.active b{color:#f7e9c8}
+.demorow{display:flex;gap:7px;margin-top:auto}
 .demorow .btn{flex:1;padding:10px 0;font-size:12px;white-space:nowrap}
 </style>
 </head>
 <body>
 <div class="phone">
   <div class="topbar">
-    <a class="back" href="03-home.html">←</a>
-    <div class="title">手势抓取</div>
+    <a class="back" href="03-home.html">&lt;</a>
     <div class="spacer"></div>
     <span class="chip seal" id="cityChip">—</span>
   </div>
@@ -117,10 +120,6 @@
   <div class="cam" id="cam">
     <span class="corner c1"></span><span class="corner c2"></span>
     <span class="corner c3"></span><span class="corner c4"></span>
-    <span class="tag" style="top:10px;left:40px">手部关键点 · 21</span>
-    <span class="tag" id="mpTag" style="top:10px;right:40px">● 未开启</span>
-    <span class="tag" style="bottom:10px;left:40px">MediaPipe Hands</span>
-    <span class="tag" style="bottom:10px;right:40px">取景区</span>
 
     <canvas id="dust"></canvas>
     <video id="video" playsinline muted></video>
@@ -138,22 +137,18 @@
         <canvas id="dirt"></canvas>
       </div>
       <b id="rvName">—</b>
-      <span class="era" id="rvEra">—</span>
       <div class="cbarrow">
         <div class="cbar"><div class="cfill" id="cfill"></div></div>
         <span id="cpct">0%</span>
       </div>
-      <div class="hint">做「挥手」手势在物件上平移，擦去千年尘土<br>（也可按住物件用鼠标 / 手指擦拭）</div>
       <button class="pull" id="pullBtn" type="button" disabled>双手拉开 · 听 AI 讲故事 ✨</button>
     </div>
-  </div>
 
-  <div class="hud"><span class="dot off" id="hudDot"></span><span id="hudText">点击「开启手势识别」授权摄像头，或直接用下方演示按钮</span></div>
-
-  <div class="gsteps">
-    <div class="gstep" id="gs-grab"><span class="gi" id="gi-grab"></span><b>握拳 · 抓取</b><i>光球炸开出现物件</i></div>
-    <div class="gstep" id="gs-clean"><span class="gi" id="gi-clean"></span><b>挥手 · 清理</b><i>掌心平移 擦去尘土</i></div>
-    <div class="gstep" id="gs-pull"><span class="gi" id="gi-pull"></span><b>双手拉开</b><i>触发 AI 讲故事</i></div>
+    <div class="gsteps">
+      <div class="gstep" id="gs-grab"><span class="gi" id="gi-grab"></span><b>握拳 · 抓取</b></div>
+      <div class="gstep" id="gs-clean"><span class="gi" id="gi-clean"></span><b>挥手 · 清理</b></div>
+      <div class="gstep" id="gs-pull"><span class="gi" id="gi-pull"></span><b>双手拉开</b></div>
+    </div>
   </div>
 
   <div class="demorow">
@@ -162,8 +157,6 @@
     <button class="btn ghost" id="demoClean" type="button">演示：清理</button>
     <button class="btn ghost" id="demoPull" type="button">演示：拉开</button>
   </div>
-
-  <div class="note">请正对摄像头、保证光线充足；无摄像头时可用演示按钮完成同样流程</div>
 </div>
 
 <script src="js/data.js"></script>
@@ -192,10 +185,8 @@
   var reveal = document.getElementById('reveal');
   var cam = document.getElementById('cam');
 
-  function setHud(text, cls){
-    document.getElementById('hudText').textContent = text;
-    document.getElementById('hudDot').className = 'dot ' + (cls || '');
-  }
+  /* HUD 状态行已删；保留空实现兼容手势流程中的既有调用 */
+  function setHud(text, cls){}
   function setStep(name){
     ['grab','clean','pull'].forEach(function(k){
       document.getElementById('gs-' + k).classList.toggle('active', k === name);
@@ -246,7 +237,6 @@
     el3d.style.background = artHtml ? 'radial-gradient(75% 70% at 50% 42%, #35301f, #1c1812 78%)' : 'hsl(' + it.hue + ',38%,86%)';
     el3d.style.borderColor = artHtml ? '#8a744a' : '';
     document.getElementById('rvName').textContent = it.name;
-    document.getElementById('rvEra').textContent = it.en + ' · ' + it.era;
     reveal.classList.add('show');
     document.getElementById('dirt').classList.remove('done');
     document.getElementById('cfill').style.width = '0%';
@@ -600,9 +590,7 @@
       mpLoading = false; clearTimeout(loadTimer); hideCamLoading();
       if(video.srcObject) video.srcObject.getTracks().forEach(function(t){ t.stop(); });
       cam.classList.remove('cam-on');
-      document.getElementById('mpTag').textContent = '● 未开启';
-      btn.innerHTML = ico('camera', 14) + ' 开启手势识别'; setHud('摄像头已关闭，可用演示按钮继续', 'off');
-      document.getElementById('hudDot').className = 'dot off';
+      btn.innerHTML = ico('camera', 14) + ' 开启手势识别';
       dustStart();
       return;
     }
@@ -630,10 +618,7 @@
       camOn = true; running = true;
       canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
       cam.classList.add('cam-on');
-      document.getElementById('mpTag').textContent = '● 加载模型';
       btn.innerHTML = ico('clock', 14) + ' 加载识别模型…';
-      setHud('组件已就绪，正在加载识别模型…', 'ok');
-      document.getElementById('hudDot').className = 'dot ok';
       dustStop();   // 摄像头识别时暂停背景粒子，把算力留给手势识别
       mpLoading = true;
       loadTimer = setTimeout(function(){   // 25 秒仍无结果视为超时
@@ -641,9 +626,7 @@
         mpLoading = false; hideCamLoading(); running = false; camOn = false;
         if(video.srcObject) video.srcObject.getTracks().forEach(function(t){ t.stop(); });
         cam.classList.remove('cam-on');
-        document.getElementById('mpTag').textContent = '● 未开启';
         btn.innerHTML = ico('camera', 14) + ' 开启手势识别';
-        setHud('模型加载超时，请检查网络后重试（或用演示按钮）', 'off');
         toast('识别模型加载超时');
       }, 25000);
       loop();
