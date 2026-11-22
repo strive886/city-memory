@@ -35,13 +35,13 @@ a{color:inherit}
 
 /* ---------- 作业展示壳：页码标签 + 手机 + 翻页 ---------- */
 .phone{
-  width:390px;max-width:100%;
+  width:440px;max-width:100%;
   background:var(--card);
-  border:2px solid var(--ink);border-radius:30px;
+  border:2px solid var(--ink);border-radius:48px;
   padding:24px 20px 20px;
   display:flex;flex-direction:column;gap:16px;
   box-shadow:var(--shadow);
-  min-height:640px;position:relative;
+  min-height:956px;position:relative;   /* iPhone Pro Max 逻辑尺寸 440×956 */
 }
 .phone.dark{background:#221e18;border-color:#0e0c09;color:#efe7d8}
 
@@ -165,6 +165,8 @@ a{color:inherit}
 @keyframes spinSlow{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
 @media (max-width:430px){ body{padding:18px 8px 48px} .phone{border-radius:24px} }
+
+/* 全设备统一 iPhone Pro Max 手机壳（440×956），无宽屏分支 */
 
 /* ---------- 线性图标 ---------- */
 .ico{display:inline-block;vertical-align:-0.18em;flex:0 0 auto}
