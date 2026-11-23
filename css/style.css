@@ -49,9 +49,9 @@ a{color:inherit}
 .topbar{display:flex;align-items:center;gap:12px}
 .back{
   width:34px;height:34px;flex:0 0 34px;border:none;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;font-size:19px;
+  display:flex;align-items:center;justify-content:center;
   cursor:pointer;background:var(--seal);color:#fff8ef;text-decoration:none;user-select:none;
-  box-shadow:0 3px 8px rgba(181,64,44,.35);font-weight:700;
+  box-shadow:0 3px 8px rgba(181,64,44,.35);
 }
 .back:hover{background:#a03824;color:#fff8ef}
 .title{font-size:17px;font-weight:700;font-family:var(--serif);letter-spacing:2px}
