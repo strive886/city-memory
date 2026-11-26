@@ -93,7 +93,8 @@
   position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:6;
   display:flex;flex-direction:column;gap:10px;width:96px;
 }
-.cam.cam-on .gsteps{display:none}   /* 摄像头开启后隐藏右侧步骤卡，保持画面干净 */
+.cam.cam-on .gsteps,
+.cam.demo-mode .gsteps{display:none}   /* 摄像头或演示模式下隐藏右侧步骤卡，保持画面干净 */
 .gstep{
   border:1.5px solid rgba(216,207,191,.4);border-radius:12px;padding:11px 4px;
   display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;
@@ -384,6 +385,7 @@
 
   document.getElementById('pullBtn').onclick = pullApart;
   document.getElementById('demoClean').onclick = function(){
+    cam.classList.add('demo-mode');
     if(state === 'idle'){ toast('先「握拳抓取」打开盲盒'); return; }
     if(state === 'cleaned'){ toast('已经清理完成啦'); return; }
     var step = 0;
@@ -396,11 +398,15 @@
     }, 60);
   };
   document.getElementById('demoPull').onclick = function(){
+    cam.classList.add('demo-mode');
     if(state === 'idle') toast('先「握拳抓取」打开盲盒，再拉开哦');
     else if(state === 'cleaning') toast('先把文物清理干净，再拉开听故事哦');
     else pullApart();
   };
-  document.getElementById('demoGrab').onclick = function(){ doGrab(); };
+  document.getElementById('demoGrab').onclick = function(){
+    cam.classList.add('demo-mode');
+    doGrab();
+  };
   orb.onclick = function(){ doGrab(); };
 
   /* ---------- 背景粒子：金色尘埃缓缓上浮（摄像头开启时自动暂停） ---------- */
@@ -586,6 +592,7 @@
 
   document.getElementById('camBtn').onclick = async function(){
     var btn = this;
+    cam.classList.remove('demo-mode');
     if(camOn){ running = false; camOn = false;
       mpLoading = false; clearTimeout(loadTimer); hideCamLoading();
       if(video.srcObject) video.srcObject.getTracks().forEach(function(t){ t.stop(); });
