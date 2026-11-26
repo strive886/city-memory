@@ -167,7 +167,9 @@
 (function(){
   var user = requireLogin();
 
-  var cityId = Biz.city(); if(!CITY_DATA[cityId]) cityId = 'shijiazhuang';
+  var cityId = qsParam('city') || Biz.city();
+  if(!CITY_DATA[cityId]) cityId = 'shijiazhuang';
+  Biz.setCity(cityId);
   var city = CITY_DATA[cityId];
   document.getElementById('cityChip').textContent = city.name;
 

@@ -259,7 +259,7 @@
   document.getElementById('orb').onclick = function(){ location.href = '04-grab.html'; };
   document.addEventListener('click', function(e){
     var menu = document.getElementById('cityMenu');
-    if(menu.classList.contains('show') && !menu.contains(e.target) && e.target.id !== 'cityChip'){
+    if(menu.classList.contains('show') && !menu.contains(e.target) && !e.target.closest('#cityChip')){
       menu.classList.remove('show');
     }
   });
@@ -340,9 +340,8 @@
       if(moved > 8){ e.preventDefault(); e.stopPropagation(); }
     }, true);
 
-    /* 双驱动：rAF 为主，定时器兜底（页面被遮挡 rAF 停摆时仍能续播） */
-    function loop(){
-      var now = performance.now();
+    /* rAF 驱动；页面切回时按 1 秒上限计算位移，避免后台恢复后突然跳动 */
+    function loop(now){
       var dt = lastT ? Math.min(1000, now - lastT) / 1000 : 0;
       lastT = now;
       if(!dragging && !hover && dt > 0){
@@ -350,9 +349,9 @@
         wrap();
         paint();
       }
+      requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
-    setInterval(loop, 250);
   })();
 
   /* 登录后首次进入首页：自动定位所在城市 */

@@ -317,7 +317,7 @@ var AI = (function(){
         q: ['还有哪些老物件', '别的物件', '其他物件'],
         a: '这座城市的老物件还有好几件呢：' + CITY_DATA[item.city].items
             .map(function(id){ return '「' + ITEM_DATA[id].name + '」'; }).join('、') +
-           '。集齐全城四件，还能解锁一段隐藏故事。'
+           '。集齐全城 ' + CITY_DATA[item.city].items.length + ' 件，还能解锁一段隐藏故事。'
       });
       var cityQa = CITY_QA[CITY_DATA[item.city].id] || [];
       cityQa.forEach(function(f){ pool = pool.concat(f); });

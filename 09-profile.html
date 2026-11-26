@@ -337,7 +337,7 @@
           if(cb.checked){ picked[cb.getAttribute('data-k')] = true; any = true; }
         });
         if(!any){ toast('未勾选任何项'); return false; }
-        if(picked.collected){ Store.del('collected'); Store.del('hidden'); }
+        if(picked.collected){ Store.del('collected'); Store.del('hidden'); Store.del('cards'); }
         if(picked.history){ Store.del('history'); }
         if(picked.ask){ Store.del('askCount'); }
         if(picked.misc){ Store.del('city'); Store.del('lastGrab'); }
