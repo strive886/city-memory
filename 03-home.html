@@ -32,8 +32,9 @@
 .slot:hover{transform:translateY(-2px)}
 .slot .thumb{
   width:100%;height:58px;border-radius:8px;display:flex;align-items:center;justify-content:center;
-  border:1.5px solid var(--line);
+  border:1.5px solid var(--line);overflow:hidden;
 }
+.slot .thumb .pedestal{transform:scale(1.08)}
 .slot .nm{font-size:10px;line-height:1.35;text-align:center;color:var(--ink-2);height:27px;overflow:hidden}
 .slot.locked{border-style:dashed;border-color:var(--line);cursor:pointer;background:#fbf8f0}
 .slot.locked:hover{background:#f6efdf}
@@ -55,8 +56,9 @@
 }
 .car-card .thumb{
   height:68px;border-radius:8px;display:flex;align-items:center;justify-content:center;
-  border:1.5px solid #4a4030;background:radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%);
+  border:1.5px solid #4a4030;background:radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%);overflow:hidden;
 }
+.car-card .thumb .pedestal{transform:scale(1.06)}
 .car-card .nm{font-size:10.5px;line-height:1.3;height:27px;overflow:hidden;color:var(--ink)}
 .car-card .meta{font-size:9px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .car-card .got{
@@ -185,7 +187,7 @@
     document.getElementById('grid').innerHTML = ids.map(function(id){
       var it = ITEM_DATA[id];
       if(collected[id]){
-        var ah = itemArt(id, 46);
+        var ah = itemArt(id, 58);
         return '<a class="slot" href="05-chat.html?item=' + id + '">' +
           '<div class="thumb" style="' + (ah ?
             'background:radial-gradient(75% 70% at 50% 42%, #35301f, #201b12 78%);border-color:#4a4030' :
@@ -290,7 +292,7 @@
       var it = ITEM_DATA[id], ct = CITY_DATA[it.city];
       return '<a class="car-card" href="05-chat.html?item=' + id + '" draggable="false">' +
         (got[id] ? '<i class="got">✓</i>' : '') +
-        '<div class="thumb">' + (itemArt(id, 42) || it.emoji) + '</div>' +
+        '<div class="thumb">' + (itemArt(id, 64) || it.emoji) + '</div>' +
         '<div class="nm">' + it.name + '</div>' +
         '<span class="meta">' + ct.name + '</span></a>';
     }).join('');
